@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['identificador'];
     $pass = $_POST['password'];
 
-    // Primero busca en la tabla de ALUMNOS
+    // Busca en la tabla de ALUMNOS
     $stmt = $pdo->prepare("SELECT * FROM alumnos WHERE num_control = ?");
     $stmt->execute([$id]);
     $alumno = $stmt->fetch();
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Si no es alumno, buscar en USUARIOS (Admin/Contribuyente)
+    // Si no es alumno, buscar en USUARIOS
     $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE num_trabajador = ? AND estatus = 1");
     $stmt->execute([$id]);
     $personal = $stmt->fetch();
@@ -33,11 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_SESSION['rol'] == 'admin') {
             header("Location: ../vistas/admin_dashboard.php");
         } else {
-            header("Location: ../vistas/solicitudes_revision.php");
+            header("Location: ../vistas/admin_solicitudes.php");
         }
         exit;
     }
 
-    // Si no se encuentra en ninguna de las tablas los datos estan incorrectos
+    // Si no se encuentra en ninguna no existe el registro o son incorrecto sus datos
     header("Location: ../vistas/login.php?error=Datos incorrectos");
 }

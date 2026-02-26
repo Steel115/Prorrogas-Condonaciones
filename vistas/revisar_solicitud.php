@@ -1,8 +1,11 @@
 <?php 
 require_once '../config/db.php'; 
 include '../includes/auth_check.php'; 
+require_once '../includes/auth_check.php';
+permitirAcceso(['admin', 'contribuyente']);
+
 $id_solicitud = $_GET['id'];
-// 1. Obtener datos de la solicitud, alumno y trámite
+
 $sql = "SELECT s.*, al.nombre_completo, al.num_control, a.titulo, a.instrucciones 
         FROM solicitudes s
         JOIN alumnos al ON s.num_control_alumno = al.num_control
@@ -26,6 +29,7 @@ $archivos = $stmtFiles->fetchAll();
 </head>
 <body class="bg-light">
     <div class="container mt-4">
+        <a href="admin_solicitudes.php" class="btn btn-sm btn-outline-secondary mb-3">← Volver</a>
         <div class="row">
             <div class="col-md-8">
                 <div class="card shadow-sm mb-4">

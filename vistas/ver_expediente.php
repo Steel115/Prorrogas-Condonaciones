@@ -1,15 +1,29 @@
 <?php 
 require_once '../config/db.php'; 
 include '../includes/auth_check.php'; 
+require_once '../includes/auth_check.php';
+permitirAcceso(['admin', 'contribuyente']);
 
 $num_control = $_GET['num_control'];
 
-// Datos del alumno
-$stmtAlu = $pdo->prepare("SELECT * FROM alumnos WHERE num_control = ?");
+$stmtAlu = $pdo->prepare("SELECT 
+                            a.nombre_completo, 
+                            a.num_control, 
+                            a.es_deudor, 
+                            e.carrera, 
+                            e.semestre 
+                          FROM alumnos a
+                          INNER JOIN bd_estudiantes e ON a.num_control = e.num_control
+                          WHERE a.num_control = ?");
 $stmtAlu->execute([$num_control]);
 $alumno = $stmtAlu->fetch();
 
-// Historial de trámites
+// Si no se encuentra el alumno (por seguridad)
+if (!$alumno) {
+    die("Error: El alumno no se encuentra en los registros académicos.");
+}
+
+// El resto de la consulta de solicitudes se queda igual
 $sql = "SELECT s.*, a.titulo, a.ciclo_escolar, u.nombre_completo as revisor 
         FROM solicitudes s
         JOIN asignaciones a ON s.id_asignacion = a.id_asignacion
@@ -35,7 +49,7 @@ $solicitudes = $stmtSol->fetchAll();
 <body>
 
 <div class="container">
-    <a href="admin_historial.php" class="btn btn-sm btn-outline-secondary mb-3">← Volver al buscador</a>
+    <a href="admin_historial.php" class="btn btn-sm btn-outline-secondary mb-3">← Volver</a>
 
     <div class="card shadow-sm mb-4 card-alumno">
         <div class="card-body">

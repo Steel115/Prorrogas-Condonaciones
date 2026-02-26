@@ -1,6 +1,8 @@
 <?php 
 require_once '../config/db.php'; 
 include '../includes/auth_check.php'; 
+require_once '../includes/auth_check.php';
+permitirAcceso(['admin', 'contribuyente']);
 
 if ($_SESSION['rol'] !== 'admin' && $_SESSION['rol'] !== 'contribuyente') {
     header("Location: ../login.php");
@@ -25,6 +27,12 @@ $solicitudes = $stmt->fetchAll();
     <meta charset="UTF-8">
     <title>Solicitudes Recibidas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .nav-tabs .nav-link.active {
+            border-bottom: 3px solid #007bff;
+            color: #007bff;
+        }
+    </style>
 </head>
 <header class="p-3 bg-white border-bottom shadow-sm">
         <div class="container d-flex justify-content-between align-items-center">
@@ -33,7 +41,26 @@ $solicitudes = $stmt->fetchAll();
         </div>
 </header>
 <body class="bg-light">
-    <div class="container mt-5">
+    <div class="container mt-4">
+        <ul class="nav nav-tabs mb-4">
+            <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_dashboard.php') ? 'active' : ''; ?>" href="admin_dashboard.php">Asignaciones</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_usuarios.php') ? 'active' : ''; ?>" href="admin_usuarios.php">Usuarios</a>
+                </li>
+            <?php endif; ?>
+            <li class="nav-item">
+                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_solicitudes.php') ? 'active' : ''; ?>" href="admin_solicitudes.php">Solicitudes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_historial.php') ? 'active' : ''; ?>" href="admin_historial.php">Historial</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_deudores.php') ? 'active' : ''; ?>" href="admin_deudores.php">Deudores</a>
+            </li>
+        </ul>
         <h3 class="mb-4">Solicitudes Recibidas</h3>
         
         <div class="card shadow">

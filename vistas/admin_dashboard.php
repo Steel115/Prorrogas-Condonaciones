@@ -1,10 +1,9 @@
 <?php 
 require_once '../config/db.php';
 include '../includes/auth_check.php'; 
-if ($_SESSION['rol'] !== 'admin') {
-    header("Location: alumno_tramites.php");
-    exit;
-}
+require_once '../includes/auth_check.php';
+
+permitirAcceso(['admin']);
 ?>
 
 <!DOCTYPE html>
@@ -31,11 +30,24 @@ if ($_SESSION['rol'] !== 'admin') {
 
     <div class="container mt-4">
         <ul class="nav nav-tabs mb-4">
-            <li class="nav-item"><a class="nav-link active" href="#">Asignaciones</a></li>
-            <li class="nav-item"><a class="nav-link" href="admin_usuarios.php">Usuarios</a></li>
-            <li class="nav-item"><a class="nav-link" href="admin_solicitudes.php">Solicitudes</a></li>
-            <li class="nav-item"><a class="nav-link" href="admin_historial.php">Historial</a></li>
-            <li class="nav-item"><a class="nav-link" href="admin_deudores.php">Deudores</a></li>
+            <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_dashboard.php') ? 'active' : ''; ?>" href="admin_dashboard.php">Asignaciones</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_usuarios.php') ? 'active' : ''; ?>" href="admin_usuarios.php">Usuarios</a>
+                </li>
+            <?php endif; ?>
+            
+            <li class="nav-item">
+                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_solicitudes.php') ? 'active' : ''; ?>" href="admin_solicitudes.php">Solicitudes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_historial.php') ? 'active' : ''; ?>" href="admin_historial.php">Historial</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_deudores.php') ? 'active' : ''; ?>" href="admin_deudores.php">Deudores</a>
+            </li>
         </ul>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -44,8 +56,9 @@ if ($_SESSION['rol'] !== 'admin') {
                 + Nueva Asignación
             </button>
         </div>
+        
+        <div class="row">
             <?php
-            // 
             $stmt = $pdo->prepare("SELECT * FROM asignaciones WHERE estatus = 0 ORDER BY fecha_creacion DESC");
             $stmt->execute();
             $asignaciones = $stmt->fetchAll();
@@ -71,7 +84,10 @@ if ($_SESSION['rol'] !== 'admin') {
                                     ✏️ Editar
                                 </button>
                                 <a href="../auth/archivar_asignacion.php?id=<?php echo $asig['id_asignacion']; ?>" 
-                                class="btn btn-warning btn-sm"> 📁 </a>
+                                class="btn btn-warning btn-sm" 
+                                onclick="return confirm('¿Deseas archivar este trámite? Dejará de ser visible para los alumnos.');">
+                                📁 Archivar
+                                </a>
                                 <a href="../auth/eliminar_asignacion.php?id=<?php echo $asig['id_asignacion']; ?>" 
                                 class="btn btn-outline-danger btn-sm" 
                                 onclick="return confirm('¡ADVERTENCIA! Esta acción borrará el trámite PERMANENTEMENTE de la base de datos. ¿Deseas continuar?');">
@@ -81,7 +97,49 @@ if ($_SESSION['rol'] !== 'admin') {
                     </div>
                 </div>
             <?php endforeach; ?>
+        </div>
 
+        <hr class="my-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-muted"><i class="bi bi-archive"></i>Asignaciones Archivadas</h4>
+        </div>
+
+        <div class="row">
+            <?php
+            $stmtArch = $pdo->prepare("SELECT * FROM asignaciones WHERE estatus = 1 ORDER BY fecha_creacion DESC");
+            $stmtArch->execute();
+            $archivadas = $stmtArch->fetchAll();
+
+            if (count($archivadas) > 0):
+                foreach ($archivadas as $arch): ?>
+                    <div class="col-md-4 mb-3">
+                        <div class="card shadow-sm border-secondary bg-light opacity-75">
+                            <div class="card-body">
+                                <h5 class="card-title text-muted"><?php echo htmlspecialchars($arch['titulo']); ?></h5>
+                                <p class="text-muted mb-1 small"><strong>Ciclo:</strong> <?php echo $arch['ciclo_escolar']; ?></p>
+                                <p class="text-muted small"><strong>Finalizó:</strong> <?php echo date('d/m/Y', strtotime($arch['fecha_limite'])); ?></p>
+                                
+                                <div class="d-flex justify-content-end gap-2 mt-3">
+                                    <a href="../auth/restaurar_asignacion.php?id=<?php echo $arch['id_asignacion']; ?>" 
+                                    class="btn btn-sm btn-outline-success" title="Reactivar">
+                                        🔄 Restaurar
+                                    </a>
+                                    <a href="../auth/eliminar_asignacion.php?id=<?php echo $arch['id_asignacion']; ?>" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    onclick="return confirm('¿Eliminar permanentemente de la base de datos?');">
+                                        ❌
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; 
+            else: ?>
+                <div class="col-12">
+                    <p class="text-center text-muted py-3 italic">No hay trámites archivados en este momento.</p>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 
     <?php include 'modales/nueva_asignacion.php'; ?>
@@ -89,8 +147,7 @@ if ($_SESSION['rol'] !== 'admin') {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-function llenarModalEditar(boton) {
-    // Obtenemos los datos del botón
+    function llenarModalEditar(boton) {
     const id = boton.getAttribute('data-id');
     const titulo = boton.getAttribute('data-titulo');
     const ciclo = boton.getAttribute('data-ciclo');
@@ -98,7 +155,6 @@ function llenarModalEditar(boton) {
     const instrucciones = boton.getAttribute('data-instrucciones');
     const terminos = boton.getAttribute('data-terminos');
 
-    // Los ponemos en los inputs del modal
     document.getElementById('edit_id').value = id;
     document.getElementById('edit_titulo').value = titulo;
     document.getElementById('edit_ciclo').value = ciclo;

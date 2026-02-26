@@ -1,8 +1,8 @@
 <div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Registrar Nuevo Personal</h5>
+      <div class="modal-header bg-primary text-white" >
+        <h5 class="modal-title">Nuevo Usuario</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form action="../auth/guardar_usuario.php" method="POST">
@@ -27,7 +27,7 @@
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Contraseña Temporal</label>
+            <label class="form-label">Contraseña</label>
             <input type="password" name="password" class="form-control" required>
           </div>
         </div>

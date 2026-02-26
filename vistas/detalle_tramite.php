@@ -53,6 +53,7 @@ if (isset($_GET['id'])) {
             <h2 class="mb-4"><?php echo htmlspecialchars($t['titulo']); ?></h2>
             <?php if (!$t_status): ?>
                 <div class="card p-4 mb-4 border-warning">
+                    
                     <h5>Términos y Condiciones</h5>
                     <p class="text-muted"><?php echo nl2br(htmlspecialchars($t['terminos'])); ?></p>
                     <div class="d-flex gap-3">
