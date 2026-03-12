@@ -67,7 +67,7 @@ if ($_SESSION['rol'] !== 'alumno') {
         </div>
     </main>
 
-    <footer class="mt-auto py-3 bg-white border-top fixed-bottom">
+    <footer class="mt-auto py-3 bg-white border-top">
         <div class="container text-center">
             <div class="dropup">
                 <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">

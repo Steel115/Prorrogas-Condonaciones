@@ -51,24 +51,33 @@ if (isset($_GET['id'])) {
         </header>
         <main class="container mt-5">
             <h2 class="mb-4"><?php echo htmlspecialchars($t['titulo']); ?></h2>
+            
             <?php if (!$t_status): ?>
-                <div class="card p-4 mb-4 border-warning">
-                    
-                    <h5>Términos y Condiciones</h5>
-                    <p class="text-muted"><?php echo nl2br(htmlspecialchars($t['terminos'])); ?></p>
-                    <div class="d-flex gap-3">
-                        <button type="button" id="btnAcepto" class="btn btn-outline-success">Sí, acepto los términos</button>
-                        <button type="button" id="btnNoAcepto" class="btn btn-outline-danger">No acepto</button>
+                <div class="card p-4 mb-4 shadow-sm">
+                    <h5 class="text-info"><i class="bi bi-info-circle"></i> Instrucciones del Proceso</h5>
+                    <div class="p-3 bg-white border rounded">
+                        <p class="mb-0"><?php echo nl2br(htmlspecialchars($t['instrucciones'])); ?></p>
                     </div>
                 </div>
 
-                <div class="card p-4 shadow-sm">
+                <div id="seccionTerminos" class="alert alert-warning p-4 mb-4 shadow-sm border-2">
+                    <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Términos y Condiciones</h5>
+                    <p><?php echo nl2br(htmlspecialchars($t['terminos'])); ?></p>
+                    <hr>
+                    <div class="d-flex gap-3">
+                        <button type="button" id="btnAcepto" class="btn btn-success">Sí, acepto los términos</button>
+                        <button type="button" id="btnNoAcepto" class="btn btn-danger">No acepto</button>
+                    </div>
+                </div>
+
+                <div id="seccionSubida" class="card p-4 shadow-sm d-none">
                     <h5>Subir Documentación</h5>
-                    <p>Solo archivos PDF (Máx. 5MB)</p>
+                    <p class="text-muted small">Solo archivos PDF, JPG, PNG (Máx. 5MB)</p>
                     <form action="../auth/subir_archivos.php" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="id_asignacion" value="<?php echo $id_asignacion; ?>">
-                        <input type="file" name="documentos[]" class="form-control mb-3" multiple id="inputArchivos" disabled>
-                        <button type="submit" id="btnEnviar" class="btn btn-primary w-100" disabled>Enviar Solicitud</button>
+                        <input type="file" name="documentos[]" class="form-control mb-3" multiple id="inputArchivos" 
+                            accept=".pdf, .jpg, .jpeg, .png" required>
+                        <button type="submit" id="btnEnviar" class="btn btn-primary w-100">Enviar Solicitud</button>
                     </form>
                 </div>
 
@@ -122,7 +131,7 @@ if (isset($_GET['id'])) {
             <?php endif; ?>
         </main>
 
-        <footer class="mt-auto py-3 bg-white border-top fixed-bottom">
+        <footer class="mt-auto py-3 bg-white border-top">
             <div class="container text-center">
                 <div class="dropup">
                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -140,28 +149,25 @@ if (isset($_GET['id'])) {
 
         <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const seccionTerminos = document.getElementById('seccionTerminos');
+    const seccionSubida = document.getElementById('seccionSubida');
     const btnAcepto = document.getElementById('btnAcepto');
     const btnNoAcepto = document.getElementById('btnNoAcepto');
-    const inputArchivos = document.getElementById('inputArchivos');
-    const btnEnviar = document.getElementById('btnEnviar');
+
     btnAcepto.addEventListener('click', function() {
-        btnAcepto.classList.replace('btn-outline-success', 'btn-success');
-        btnNoAcepto.classList.replace('btn-danger', 'btn-outline-danger');
-        inputArchivos.disabled = false;
-        btnEnviar.disabled = false;
-        
-        alert("¡Términos aceptados! Ahora puedes seleccionar tus archivos.");
+        seccionTerminos.classList.add('d-none');
+        seccionSubida.classList.remove('d-none');
+        alert("Terminos y condiciones aceptados. Ya puedes subir tus documentos");
     });
     btnNoAcepto.addEventListener('click', function() {
-        btnAcepto.classList.replace('btn-success', 'btn-outline-success');
-        btnNoAcepto.classList.replace('btn-outline-danger', 'btn-danger');
-        inputArchivos.disabled = true;
-        btnEnviar.disabled = true;
-        inputArchivos.value = "";
+        window.location.href = 'alumno_tramites.php';
     });
-    btnEnviar.addEventListener('click', function() {
-    this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
-});
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function() {
+        const btn = document.getElementById('btnEnviar');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+        btn.disabled = true;
+    });
 });
 </script>
 

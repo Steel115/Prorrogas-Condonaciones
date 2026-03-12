@@ -22,8 +22,8 @@
           <div class="mb-3">
             <label class="form-label">Rol del Usuario</label>
             <select name="rol" class="form-select">
-                <option value="0">Contribuyente (Solo revisa)</option>
-                <option value="1">Administrador (Control total)</option>
+                <option value="0">Contribuyente</option>
+                <option value="1">Administrador</option>
             </select>
           </div>
           <div class="mb-3">
