@@ -49,87 +49,146 @@ if (isset($_GET['id'])) {
                 </div>
             </div>
         </header>
-        <main class="container mt-5">
-            <h2 class="mb-4"><?php echo htmlspecialchars($t['titulo']); ?></h2>
+    <main class="container mt-5">
+        <h2 class="mb-4"><?php echo htmlspecialchars($t['titulo']); ?></h2>
+        
+        <?php if (!$t_status): ?>
+            <div class="card p-4 mb-4 shadow-sm">
+                <h5 class="text-info"><i class="bi bi-info-circle"></i> Instrucciones del Proceso</h5>
+                <div class="p-3 bg-white border rounded">
+                    <p class="mb-0"><?php echo nl2br(htmlspecialchars($t['instrucciones'])); ?></p>
+                </div>
+            </div>
+
+            <div id="seccionTerminos" class="alert alert-warning p-4 mb-4 shadow-sm border-2">
+                <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Términos y Condiciones</h5>
+                <p><?php echo nl2br(htmlspecialchars($t['terminos'])); ?></p>
+                <hr>
+                <div class="d-flex gap-3">
+                    <button type="button" id="btnAcepto" class="btn btn-success">Sí, acepto los términos</button>
+                    <button type="button" id="btnNoAcepto" class="btn btn-danger">No acepto</button>
+                </div>
+            </div>
+
+            <div id="seccionSubida" class="card p-4 shadow-sm d-none">
+                <h5>Subir Documentación</h5>
+                <p class="text-muted small">Solo archivos PDF, JPG, PNG (Máx. 5MB)</p>
+                <form action="../auth/subir_archivos.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="id_asignacion" value="<?php echo $id_asignacion; ?>">
+                    <input type="file" name="documentos[]" class="form-control mb-3" multiple id="inputArchivos" 
+                        accept=".pdf, .jpg, .jpeg, .png" required>
+                    <button type="submit" id="btnEnviar" class="btn btn-primary w-100">Enviar Solicitud</button>
+                </form>
+            </div>
+
+        <?php elseif ($t_status['estatus'] == 'Deudor'): ?>
+            <div class="alert alert-danger p-5 text-center shadow">
+                <h2>⚠️ Estatus: DEUDOR</h2>
+                <p class="lead">Se ha detectado una irregularidad en tu proceso.</p>
+                <p>Por favor, acude a las oficinas de Recursos Financieros para aclarar tu situación y poder continuar con tu trámite.</p>
+                <hr>
+                <a href="alumno_tramites.php" class="btn btn-danger">Regresar a mis trámites</a>
+            </div>
+
+    <?php elseif ($t_status['estatus'] == 'Pendiente' || $t_status['estatus'] == 'En revisión'): ?>
+    <div class="alert alert-light border p-4 shadow-sm">
+        <h4 class="text-center mb-4"><i class="bi bi-clock-history text-primary"></i> Estado del Trámite</h4>
+        
+        <?php if (!empty($t_status['comentarios'])): ?>
+            <div class="alert alert-danger border-start border-4 mb-4">
+                <h6 class="fw-bold"><i class="bi bi-exclamation-circle"></i> Observación para corregir:</h6>
+                <p class="mb-0"><?php echo htmlspecialchars($t_status['comentarios']); ?></p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-7">
+                    <div class="p-3 bg-white border rounded text-center">
+                        <h5><i class="bi bi-pencil-square"></i> Editar Documentación</h5>
+                        <p class="small text-muted">Haz clic abajo para eliminar los archivos anteriores y subir los nuevos.</p>
+                        
+                        <form action="../auth/limpiar_expediente.php" method="POST" onsubmit="return confirm('¿Deseas quitar tus archivos actuales para reemplazarlos?');">
+                            <input type="hidden" name="id_solicitud" value="<?php echo $solicitud_id; ?>">
+                            <input type="hidden" name="id_asignacion" value="<?php echo $id_asignacion; ?>">
+                            <button type="submit" class="btn btn-danger w-100 py-2">
+                                <i class="bi bi-trash"></i> Limpiar y Volver a Subir
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="col-md-5">
+                    <div class="p-3 bg-light border rounded">
+                        <h6>Tus archivos actuales:</h6>
+                        <ul class="list-group list-group-flush shadow-sm">
+                            <?php
+                            $stmtActuales = $pdo->prepare("SELECT nombre_original FROM expediente_archivos WHERE id_solicitud = ?");
+                            $stmtActuales->execute([$solicitud_id]);
+                            while($f = $stmtActuales->fetch()): ?>
+                                <li class="list-group-item bg-transparent small">📄 <?php echo htmlspecialchars($f['nombre_original']); ?></li>
+                            <?php endwhile; ?>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        <?php else: ?>
+            <div class="text-center py-4">
+                <div class="mb-3">
+                    <span class="badge rounded-pill bg-primary px-4 py-2 fs-6">
+                        <i class="bi bi-search"></i> Documentación en Revisión
+                    </span>
+                </div>
+                <p class="lead mb-1">¡Hemos recibido tus documentos!</p>
+                <p class="text-muted">El personal administrativo está validando tu información. Te notificaremos por este medio si hay algún cambio en el estatus.</p>
+                <hr class="mx-auto" style="max-width: 400px;">
+                <a href="alumno_tramites.php" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver a mis trámites
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
+
+        <?php elseif ($t_status['estatus'] == 'Pago pendiente'): ?>
+    <div class="card p-4 shadow-sm border-success">
+        <h5 class="text-success fw-bold"><i class="bi bi-check2-circle"></i> ✅ Solicitud Aceptada</h5>
+        <p>Tu documentación ha sido aprobada. Por favor, sube tu <strong>comprobante de pago</strong> para finalizar.</p>
+        
+        <?php if (!empty($t_status['comentarios'])): ?>
+            <div class="alert alert-info small">
+                <strong>Nota del revisor:</strong> <?php echo htmlspecialchars($t_status['comentarios']); ?>
+            </div>
+        <?php endif; ?>
+
+        <form action="../auth/subir_pago.php" method="POST" enctype="multipart/form-data" id="formPago">
+            <input type="hidden" name="id_solicitud" value="<?php echo $solicitud_id; ?>">
             
-            <?php if (!$t_status): ?>
-                <div class="card p-4 mb-4 shadow-sm">
-                    <h5 class="text-info"><i class="bi bi-info-circle"></i> Instrucciones del Proceso</h5>
-                    <div class="p-3 bg-white border rounded">
-                        <p class="mb-0"><?php echo nl2br(htmlspecialchars($t['instrucciones'])); ?></p>
-                    </div>
-                </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Voucher de Pago</label>
+                <input type="file" name="pago" class="form-control" 
+                       accept=".pdf, .jpg, .jpeg, .png" required id="inputPago">
+                <div class="form-text">Formatos permitidos: PDF, JPG, PNG (Máx. 5MB).</div>
+            </div>
+            
+            <button type="submit" class="btn btn-success w-100" id="btnEnviarPago">
+                <i class="bi bi-cloud-upload"></i> Enviar Comprobante
+            </button>
+        </form>
+    </div>
 
-                <div id="seccionTerminos" class="alert alert-warning p-4 mb-4 shadow-sm border-2">
-                    <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Términos y Condiciones</h5>
-                    <p><?php echo nl2br(htmlspecialchars($t['terminos'])); ?></p>
-                    <hr>
-                    <div class="d-flex gap-3">
-                        <button type="button" id="btnAcepto" class="btn btn-success">Sí, acepto los términos</button>
-                        <button type="button" id="btnNoAcepto" class="btn btn-danger">No acepto</button>
-                    </div>
-                </div>
+        <?php elseif ($t_status['estatus'] == 'Validando pago'): ?>
+            <div class="alert alert-info p-4 text-center">
+                <h4>💳 Pago Recibido</h4>
+                <p>Estamos validando tu comprobante de pago. Pronto recibirás el dictamen final.</p>
+            </div>
 
-                <div id="seccionSubida" class="card p-4 shadow-sm d-none">
-                    <h5>Subir Documentación</h5>
-                    <p class="text-muted small">Solo archivos PDF, JPG, PNG (Máx. 5MB)</p>
-                    <form action="../auth/subir_archivos.php" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="id_asignacion" value="<?php echo $id_asignacion; ?>">
-                        <input type="file" name="documentos[]" class="form-control mb-3" multiple id="inputArchivos" 
-                            accept=".pdf, .jpg, .jpeg, .png" required>
-                        <button type="submit" id="btnEnviar" class="btn btn-primary w-100">Enviar Solicitud</button>
-                    </form>
-                </div>
-
-            <?php elseif ($t_status['estatus'] == 'Deudor'): ?>
-                <div class="alert alert-danger p-5 text-center shadow">
-                    <h2>⚠️ Estatus: DEUDOR</h2>
-                    <p class="lead">Se ha detectado una irregularidad en tu proceso.</p>
-                    <p>Por favor, acude a las oficinas de Recursos Financieros para aclarar tu situación y poder continuar con tu trámite.</p>
-                    <hr>
-                    <a href="alumno_tramites.php" class="btn btn-danger">Regresar a mis trámites</a>
-                </div>
-
-            <?php elseif ($t_status['estatus'] == 'Pendiente' || $t_status['estatus'] == 'En revisión'): ?>
-                <div class="alert alert-warning p-4 text-center">
-                    <h4><i class="bi bi-clock-history"></i> Solicitud en Proceso</h4>
-                    <p>Tus documentos han sido recibidos y están siendo revisados por el personal administrativo.</p>
-                    <span class="badge bg-dark text-white p-2">Estatus actual: <?php echo $t_status['estatus']; ?></span>
-                </div>
-
-            <?php elseif ($t_status['estatus'] == 'Pago pendiente'): ?>
-                <div class="card p-4 shadow-sm border-success">
-                    <h5 class="text-success">✅ Solicitud Aceptada</h5>
-                    <p>Tu documentación ha sido aprobada. Por favor, sube tu <strong>comprobante de pago</strong>.</p>
-                    <?php if (!empty($t_status['comentarios'])): ?>
-                        <div class="alert alert-info small">
-                            <strong>Nota del revisor:</strong> <?php echo htmlspecialchars($t_status['comentarios']); ?>
-                        </div>
-                    <?php endif; ?>
-                    <form action="../auth/subir_pago.php" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="id_solicitud" value="<?php echo $solicitud_id; ?>">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Voucher de Pago (PDF/Imagen)</label>
-                            <input type="file" name="pago" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100">Enviar Comprobante</button>
-                    </form>
-                </div>
-
-            <?php elseif ($t_status['estatus'] == 'Validando pago'): ?>
-                <div class="alert alert-info p-4 text-center">
-                    <h4>💳 Pago Recibido</h4>
-                    <p>Estamos validando tu comprobante de pago. Pronto recibirás el dictamen final.</p>
-                </div>
-
-            <?php elseif ($t_status['estatus'] == 'Finalizada'): ?>
-                <div class="alert alert-success p-5 text-center shadow">
-                    <h2>✨ ¡Trámite Finalizado!</h2>
-                    <p>Tu prórroga ha sido aprobada y el proceso se ha completado correctamente.</p>
-                    <a href="alumno_tramites.php" class="btn btn-outline-success">Volver al inicio</a>
-                </div>
-            <?php endif; ?>
-        </main>
+        <?php elseif ($t_status['estatus'] == 'Finalizada'): ?>
+            <div class="alert alert-success p-5 text-center shadow">
+                <h2>✨ ¡Trámite Finalizado!</h2>
+                <p>Tu prórroga ha sido aprobada y el proceso se ha completado correctamente.</p>
+                <a href="alumno_tramites.php" class="btn btn-outline-success">Volver al inicio</a>
+            </div>
+        <?php endif; ?>
+    </main>
 
         <footer class="mt-auto py-3 bg-white border-top">
             <div class="container text-center">

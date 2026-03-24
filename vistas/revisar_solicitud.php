@@ -51,53 +51,73 @@ $archivos = $stmtFiles->fetchAll();
                 </div>
 
                 <?php 
-// Buscamos si existe un archivo tipo 'pago'
-$stmtPago = $pdo->prepare("SELECT * FROM expediente_archivos WHERE id_solicitud = ? AND tipo_archivo = 'pago'");
-$stmtPago->execute([$id_solicitud]);
-$pago = $stmtPago->fetch();
-?>
+        // Buscamos si existe un archivo tipo 'pago'
+        $stmtPago = $pdo->prepare("SELECT * FROM expediente_archivos WHERE 
+        id_solicitud = ? AND tipo_archivo = 'pago'");
+        $stmtPago->execute([$id_solicitud]);
+        $pago = $stmtPago->fetch();
+        ?>
 
-<?php if ($pago): ?>
-<div class="card border-success mt-4 shadow-sm">
-    <div class="card-header bg-success text-white">
-        <h5 class="mb-0">Comprobante de Pago Recibido</h5>
-    </div>
-    <div class="card-body text-center">
-        <p>El alumno ha subido su voucher:</p>
-        <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-success mb-3">
-            🔍 Abrir Comprobante de Pago
-        </a>
-        <hr>
-        <form action="../auth/finalizar_tramite.php" method="POST">
-            <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
-            <button type="submit" class="btn btn-success btn-lg w-100">
-                ✅ Validar y Finalizar Trámite
-            </button>
-        </form>
-    </div>
-</div>
-<?php endif; ?>
+        <?php if ($pago): ?>
+        <div class="card border-success mt-4 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Comprobante de Pago Recibido</h5>
             </div>
+            <div class="card-body text-center">
+                <p>El alumno ha subido su voucher:</p>
+                <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-success mb-3">
+                    🔍 Abrir Comprobante de Pago
+                </a>
+                <hr>
+                <form action="../auth/finalizar_tramite.php" method="POST">
+                    <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
+                    <button type="submit" class="btn btn-success btn-lg w-100">
+                        ✅ Validar y Finalizar Trámite
+                    </button>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
 
             <div class="col-md-4">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm mb-4 border-info">
                     <div class="card-body">
-                        <h5 class="card-title">Dictamen</h5>
-                        <form action="../auth/procesar_dictamen.php" method="POST">
+                        <h5 class="card-title text-info"><i class="bi bi-chat-dots"></i> Observaciones</h5>
+                        <p class="small text-muted">Comunicación con el alumno si hay alguna observación.</p>
+                        
+                        <form action="../auth/guardar_comentario.php" method="POST">
                             <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
                             
                             <div class="mb-3">
-                                <label class="form-label">Comentarios / Observaciones</label>
-                                <textarea name="comentarios" class="form-control" rows="4" placeholder="Escribe aquí por qué se acepta o rechaza..."></textarea>
+                                <textarea name="comentario" class="form-control" rows="4" 
+                                        placeholder="Ej: El archvio no es legible..."><?php echo htmlspecialchars($solicitud['comentarios']); ?></textarea>
                             </div>
 
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-info text-white">
+                                    <i class="bi bi-save">Enviar comentario</i> 
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Dictamen Final</h5>
+                        <p class="small text-muted">Esto cambiará el estatus y notificará al alumno.</p>
+                        
+                        <form action="../auth/procesar_dictamen.php" method="POST">
+                            <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
+                            
                             <div class="d-grid gap-2">
                                 <button type="submit" name="accion" value="aceptar" class="btn btn-success">
-                                    Aceptar (Habilitar Pago)
+                                    <i class="bi bi-check-circle">Aceptar</i> 
                                 </button>
                                 
                                 <button type="submit" name="accion" value="rechazar" class="btn btn-danger">
-                                    Rechazar Solicitud
+                                    <i class="bi bi-x-circle">Rechazar</i> 
                                 </button>
                             </div>
                         </form>
