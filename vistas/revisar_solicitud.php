@@ -85,21 +85,20 @@ $archivos = $stmtFiles->fetchAll();
                     <div class="card-body">
                         <h5 class="card-title text-info"><i class="bi bi-chat-dots"></i> Observaciones</h5>
                         <p class="small text-muted">Comunicación con el alumno si hay alguna observación.</p>
-                        
-                        <form action="../auth/guardar_comentario.php" method="POST">
-                            <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
-                            
-                            <div class="mb-3">
-                                <textarea name="comentario" class="form-control" rows="4" 
-                                        placeholder="Ej: El archvio no es legible..."><?php echo htmlspecialchars($solicitud['comentarios']); ?></textarea>
-                            </div>
+                            <form action="../auth/guardar_comentario.php" method="POST" id="formComentario">
+                                <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
+                                    
+                                <div class="mb-3">
+                                    <textarea name="comentario" id="textoComentario" class="form-control" rows="4" 
+                                        placeholder="Ej: El archivo no es legible..."><?php echo htmlspecialchars($solicitud['comentarios']); ?></textarea>
+                                </div>
 
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-info text-white">
-                                    <i class="bi bi-save">Enviar comentario</i> 
-                                </button>
-                            </div>
-                        </form>
+                                <div class="d-grid">
+                                    <button type="submit" id="btnEnviarComentario" class="btn btn-info text-white">
+                                        <i class="bi bi-send">Enviar Observación</i> 
+                                    </button>
+                                </div>
+                            </form>    
                     </div>
                 </div>
 
@@ -126,5 +125,36 @@ $archivos = $stmtFiles->fetchAll();
             </div>
         </div>
     </div>
+
+    <script>
+document.getElementById('formComentario').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnEnviarComentario');
+    const area = document.getElementById('textoComentario');
+    const formData = new FormData(this);
+    btn.disabled = true;
+    btn.innerHTML = 'Enviando...';
+    fetch('../auth/guardar_comentario.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        area.value = '';
+        btn.innerHTML = '✅ ¡Enviado!';
+        btn.classList.replace('btn-info', 'btn-success');
+        setTimeout(() => {
+            btn.innerHTML = 'Enviar Observación';
+            btn.classList.replace('btn-success', 'btn-info');
+            btn.disabled = false;
+        }, 2000);
+    })
+    .catch(error => {
+        btn.innerHTML = '❌ Error al enviar';
+        btn.classList.replace('btn-info', 'btn-danger');
+        btn.disabled = false;
+    });
+});
+</script>                  
 </body>
 </html>
