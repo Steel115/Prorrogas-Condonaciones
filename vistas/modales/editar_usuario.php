@@ -7,7 +7,7 @@
             </div>
             <form action="../auth/editar_usuario.php" method="POST">
                 <div class="modal-body">
-                    <input type="hidden" name="id_usuario" id="edit_user_id">
+                    <input type="hidden" name="num_trabajador" id="edit_user_id">
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nombre Completo</label>
@@ -22,8 +22,8 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Rol</label>
                             <select name="rol" id="edit_user_rol" class="form-select">
-                                <option value="admin">Admin</option>
-                                <option value="contribuyente">Contribuyente</option>
+                                <option value=1>Admin</option>
+                                <option value=0>Contribuyente</option>
                             </select>
                         </div>
                     </div>

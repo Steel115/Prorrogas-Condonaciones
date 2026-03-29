@@ -1,6 +1,5 @@
 <?php 
 require_once '../config/db.php'; 
-include '../includes/auth_check.php'; 
 require_once '../includes/auth_check.php';
 permitirAcceso(['admin', 'contribuyente']);
 

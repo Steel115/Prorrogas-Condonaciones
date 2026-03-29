@@ -181,6 +181,21 @@ if (isset($_GET['id'])) {
                 <p>Estamos validando tu comprobante de pago. Pronto recibirás el dictamen final.</p>
             </div>
 
+        <?php elseif ($t_status['estatus'] == 'Rechazada'): ?>
+            <div class="alert alert-danger p-4 text-center shadow">
+                <h4>❌ Solicitud Rechazada</h4>
+                <p class="lead">Tu solicitud ha sido revisada y no fue aprobada.</p>
+                <?php if (!empty($t_status['comentarios'])): ?>
+                    <div class="alert alert-light border-start border-4 border-danger mt-3 text-start">
+                        <h6 class="fw-bold">Motivo:</h6>
+                        <p class="mb-0"><?php echo htmlspecialchars($t_status['comentarios']); ?></p>
+                    </div>
+                <?php endif; ?>
+                <hr>
+                <p class="text-muted small">Si tienes dudas, acude a las oficinas administrativas.</p>
+                <a href="alumno_tramites.php" class="btn btn-outline-danger">Regresar a mis trámites</a>
+            </div>
+
         <?php elseif ($t_status['estatus'] == 'Finalizada'): ?>
             <div class="alert alert-success p-5 text-center shadow">
                 <h2>✨ ¡Trámite Finalizado!</h2>
@@ -207,29 +222,34 @@ if (isset($_GET['id'])) {
         </footer>
 
         <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const seccionTerminos = document.getElementById('seccionTerminos');
-    const seccionSubida = document.getElementById('seccionSubida');
-    const btnAcepto = document.getElementById('btnAcepto');
-    const btnNoAcepto = document.getElementById('btnNoAcepto');
+        document.addEventListener('DOMContentLoaded', function() {
+            const seccionTerminos = document.getElementById('seccionTerminos');
+            const seccionSubida = document.getElementById('seccionSubida');
+            const btnAcepto = document.getElementById('btnAcepto');
+            const btnNoAcepto = document.getElementById('btnNoAcepto');
+            if (btnAcepto && btnNoAcepto) {
+                btnAcepto.addEventListener('click', function() {
+                    seccionTerminos.classList.add('d-none');
+                    seccionSubida.classList.remove('d-none');
+                    alert("Términos y condiciones aceptados. Ya puedes subir tus documentos");
+                });
 
-    btnAcepto.addEventListener('click', function() {
-        seccionTerminos.classList.add('d-none');
-        seccionSubida.classList.remove('d-none');
-        alert("Terminos y condiciones aceptados. Ya puedes subir tus documentos");
-    });
-    btnNoAcepto.addEventListener('click', function() {
-        window.location.href = 'alumno_tramites.php';
-    });
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function() {
-        const btn = document.getElementById('btnEnviar');
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
-        btn.disabled = true;
-    });
-});
-</script>
-
+                btnNoAcepto.addEventListener('click', function() {
+                    window.location.href = 'alumno_tramites.php';
+                });
+            }
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    const btn = document.getElementById('btnEnviar');
+                    if (btn) {
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+                        btn.disabled = true;
+                    }
+                });
+            }
+        });
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

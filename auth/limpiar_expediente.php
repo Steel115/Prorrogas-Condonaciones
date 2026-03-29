@@ -26,10 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SESSION['rol'] === 'alumno') {
         // 2. ELIMINAR LA SOLICITUD COMPLETA
         // Esto hace que $t_status sea falso en la siguiente carga
         $pdo->prepare("DELETE FROM solicitudes WHERE id_solicitud = ?")->execute([$id_solicitud]);
-
-        $pdo->commit();
-        header("Location: ../vistas/detalle_tramite.php?id=$id_asignacion&msg=Expediente listo");
-        
+        $pdo->commit();   
         // Redirigir a la misma página de detalle
         header("Location: ../vistas/detalle_tramite.php?id=$id_asignacion&msg=Expediente listo para corregir");
         exit;

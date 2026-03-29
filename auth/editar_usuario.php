@@ -1,11 +1,12 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../includes/auth_check.php';
+permitirAcceso(['admin']);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SESSION['rol'] === 'admin') {
-    $id = $_POST['id_usuario'];
-    $nombre = $_POST['nombre_completo'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $num_trabajador = $_POST['num_trabajador'];
+    $nombre = $_POST['nombre_completo'];
     $area = $_POST['area_trabajo'];
     $rol = $_POST['rol'];
     $password = $_POST['password'];
@@ -15,20 +16,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SESSION['rol'] === 'admin') {
             $pass_hash = password_hash($password, PASSWORD_DEFAULT);
             $sql = "UPDATE usuarios SET 
                     nombre_completo = ?, 
-                    num_trabajador = ?, 
                     area_trabajo = ?, 
                     rol = ?, 
                     password = ? 
-                    WHERE id_usuario = ?";
-            $params = [$nombre, $num_trabajador, $area, $rol, $pass_hash, $id];
+                    WHERE num_trabajador = ?";
+            $params = [$nombre, $area, $rol, $pass_hash, $num_trabajador];
         } else {
             $sql = "UPDATE usuarios SET 
                     nombre_completo = ?, 
-                    num_trabajador = ?, 
                     area_trabajo = ?, 
                     rol = ? 
-                    WHERE id_usuario = ?";
-            $params = [$nombre, $num_trabajador, $area, $rol, $id];
+                    WHERE num_trabajador = ?";
+            $params = [$nombre, $area, $rol, $num_trabajador];
         }
 
         $stmt = $pdo->prepare($sql);
@@ -39,3 +38,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SESSION['rol'] === 'admin') {
         header("Location: ../vistas/admin_usuarios.php?error=" . urlencode($e->getMessage()));
     }
 }
+exit;

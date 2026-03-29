@@ -1,7 +1,6 @@
 <?php 
 require_once '../config/db.php'; 
-include '../includes/auth_check.php'; 
-require_once '../includes/auth_check.php';
+require_once '../includes/auth_check.php'; // ✅ Bug 2 fix: eliminado el include duplicado
 
 permitirAcceso(['admin']);
 
@@ -84,15 +83,17 @@ $usuarios = $stmt->fetchAll();
                         <td>
                             <button class="btn btn-sm btn-outline-secondary" 
                                     data-bs-toggle="modal" 
-                                    data-bs-target="#modalEditarUsuario" 
-                                    data-nombre="<?php echo htmlspecialchars($u['nombre_completo']); ?>"
+                                    data-bs-target="#modalEditarUsuario"
+                                    data-id="<?php echo $u['num_trabajador']; ?>"
+                                    data-nombre="<?php echo htmlspecialchars($u['nombre_completo'], ENT_QUOTES); ?>"
                                     data-num="<?php echo $u['num_trabajador']; ?>"
                                     data-rol="<?php echo $u['rol']; ?>"
-                                    data-area="<?php echo htmlspecialchars($u['area_trabajo']); ?>"
+                                    data-area="<?php echo htmlspecialchars($u['area_trabajo'], ENT_QUOTES); ?>"
                                     onclick="llenarModalUsuario(this)">
                                 ✏️ Editar
                             </button>
-                            <a href="../auth/cambiar_estatus_usuario.php?id=<?php echo $u['num_trabajador']; ?>" class="btn btn-sm <?php echo ($u['estatus'] == 1) ? 'btn-outline-danger' : 'btn-outline-success'; ?>">
+                            <a href="../auth/cambiar_estatus_usuario.php?id=<?php echo $u['num_trabajador']; ?>" 
+                               class="btn btn-sm <?php echo ($u['estatus'] == 1) ? 'btn-outline-danger' : 'btn-outline-success'; ?>">
                                 <?php echo ($u['estatus'] == 1) ? 'Desactivar' : 'Activar'; ?>
                             </a>
                         </td>
@@ -109,13 +110,11 @@ $usuarios = $stmt->fetchAll();
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function llenarModalUsuario(boton) {
-    const id = boton.getAttribute('data-id');
-    const nombre = boton.getAttribute('data-nombre');
-    const num = boton.getAttribute('data-num');
-    const rol = boton.getAttribute('data-rol');
-    document.getElementById('edit_user_nombre').value = nombre;
-    document.getElementById('edit_user_num').value = num;
-    document.getElementById('edit_user_rol').value = rol;
+    document.getElementById('edit_user_id').value    = boton.getAttribute('data-id');
+    document.getElementById('edit_user_nombre').value = boton.getAttribute('data-nombre');
+    document.getElementById('edit_user_num').value   = boton.getAttribute('data-num');
+    document.getElementById('edit_user_rol').value   = boton.getAttribute('data-rol');
+    document.getElementById('edit_user_area').value  = boton.getAttribute('data-area');
 }
 </script>
 </body>

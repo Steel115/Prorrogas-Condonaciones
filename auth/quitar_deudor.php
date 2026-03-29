@@ -10,7 +10,7 @@ if (isset($_GET['id'])) {
         $stmtAlu = $pdo->prepare("SELECT num_control_alumno FROM solicitudes WHERE id_solicitud = ?");
         $stmtAlu->execute([$id_solicitud]);
         $num_control = $stmtAlu->fetchColumn();
-        $stmt1 = $pdo->prepare("UPDATE solicitudes SET estatus = 'Pago Pendiente' WHERE id_solicitud = ?");
+        $stmt1 = $pdo->prepare("UPDATE solicitudes SET estatus = 'Pago pendiente' WHERE id_solicitud = ?");
         $stmt1->execute([$id_solicitud]);
         $stmt2 = $pdo->prepare("UPDATE alumnos SET es_deudor = 0 WHERE num_control = ?");
         $stmt2->execute([$num_control]);
