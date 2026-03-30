@@ -14,7 +14,8 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute([$id_solicitud]);
 $solicitud = $stmt->fetch();
 // 2. Obtener los archivos subidos por el alumno
-$stmtFiles = $pdo->prepare("SELECT * FROM expediente_archivos WHERE id_solicitud = ?");
+$stmtFiles = $pdo->prepare("SELECT * FROM expediente_archivos 
+WHERE id_solicitud = ? AND tipo_archivo != 'pago'");
 $stmtFiles->execute([$id_solicitud]);
 $archivos = $stmtFiles->fetchAll();
 ?>
@@ -48,74 +49,94 @@ $archivos = $stmtFiles->fetchAll();
                         </div>
                     </div>
                 </div>
-
-                <?php 
-        // Buscamos si existe un archivo tipo 'pago'
+        <?php 
+        // Buscam si existe un archivo tipo 'pago'
         $stmtPago = $pdo->prepare("SELECT * FROM expediente_archivos WHERE 
         id_solicitud = ? AND tipo_archivo = 'pago'");
         $stmtPago->execute([$id_solicitud]);
         $pago = $stmtPago->fetch();
         ?>
-
         <?php if ($pago): ?>
-        <div class="card border-success mt-4 shadow-sm">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">Comprobante de Pago Recibido</h5>
+        <div class="card mt-4 shadow-sm <?php echo ($solicitud['estatus'] == 'Finalizada') ? 'border-secondary' : 'border-success'; ?>">
+            <div class="card-header <?php echo ($solicitud['estatus'] == 'Finalizada') ? 'bg-secondary' : 'bg-success'; ?> text-white">
+                <h5 class="mb-0">
+                    <?php echo ($solicitud['estatus'] == 'Finalizada') ? '🏁 Trámite Finalizado' : 'Comprobante de Pago Recibido'; ?>
+                </h5>
             </div>
             <div class="card-body text-center">
-                <p>El alumno ha subido su voucher:</p>
-                <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-success mb-3">
-                    🔍 Abrir Comprobante de Pago
-                </a>
-                <hr>
-                <form action="../auth/finalizar_tramite.php" method="POST">
-                    <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
-                    <button type="submit" class="btn btn-success btn-lg w-100">
-                        ✅ Validar y Finalizar Trámite
-                    </button>
-                </form>
+                <?php if ($solicitud['estatus'] == 'Finalizada'): ?>
+                    <p class="text-muted">Este trámite ha sido completado.</p>
+                    <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-secondary mb-3">
+                        🔍 Ver Comprobante de Pago
+                    </a>
+                    <br>
+                    <span class="badge bg-secondary fs-6 px-4 py-2">✔️ Proceso concluido</span>
+                <?php else: ?>
+                    <p>El alumno ha subido su voucher:</p>
+                    <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-success mb-3">
+                        🔍 Abrir Comprobante de Pago
+                    </a>
+                    <hr>
+                    <form action="../auth/finalizar_tramite.php" method="POST">
+                        <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
+                        <button type="submit" class="btn btn-success btn-lg w-100"
+                            onclick="return confirm('¿Confirmas que deseas FINALIZAR este trámite?')">
+                            ✅ Validar y Finalizar Trámite
+                        </button>
+                    </form>
+                <?php endif; ?>
             </div>
         </div>
         <?php endif; ?>
     </div>
 
             <div class="col-md-4">
+                <!-- Caja de mensajes -->
                 <div class="card shadow-sm mb-4 border-info">
                     <div class="card-body">
-                        <h5 class="card-title text-info"><i class="bi bi-chat-dots"></i> Observaciones</h5>
-                        <p class="small text-muted">Comunicación con el alumno si hay alguna observación.</p>
-                            <form action="../auth/guardar_comentario.php" method="POST" id="formComentario">
-                                <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
-                                    
-                                <div class="mb-3">
-                                    <textarea name="comentario" id="textoComentario" class="form-control" rows="4" 
-                                        placeholder="Ej: El archivo no es legible..."><?php echo htmlspecialchars($solicitud['comentarios']); ?></textarea>
-                                </div>
-
-                                <div class="d-grid">
-                                    <button type="submit" id="btnEnviarComentario" class="btn btn-info text-white">
-                                        <i class="bi bi-send">Enviar Observación</i> 
-                                    </button>
-                                </div>
-                            </form>    
+                        <h5 class="card-title text-info">💬 Observaciones</h5>
+                        <p class="small text-muted">Escribe un mensaje para el alumno si hay alguna observación.</p>
+                        <form action="../auth/guardar_comentario.php" method="POST" id="formComentario">
+                            <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
+                            <div class="mb-3">
+                                <textarea name="comentario" id="textoComentario" class="form-control" rows="4" 
+                                placeholder="<?php echo !empty($solicitud['comentarios']) 
+                                    ? 'Último mensaje: ' . htmlspecialchars($solicitud['comentarios'], ENT_QUOTES) 
+                                    : 'Ej: El archivo no es legible...'; ?>"></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" id="btnEnviarComentario" class="btn btn-info text-white">
+                                    Enviar Observación
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
+                <!-- Dictamen final-->
                 <div class="card shadow-sm border-dark">
                     <div class="card-body">
                         <h5 class="card-title">Dictamen Final</h5>
                         <p class="small text-muted">Esto cambiará el estatus y notificará al alumno.</p>
-                        
+                        <?php 
+                        // ✅ Bloquear si ya fue aceptada, rechazada o finalizada
+                        $estatusActual = $solicitud['estatus'];
+                        $bloqueado = in_array($estatusActual, ['Pago pendiente', 'Rechazada', 'Validando pago', 'Finalizada']);
+                        ?>
                         <form action="../auth/procesar_dictamen.php" method="POST">
                             <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
-                            
                             <div class="d-grid gap-2">
-                                <button type="submit" name="accion" value="aceptar" class="btn btn-success">
-                                    <i class="bi bi-check-circle">Aceptar</i> 
+                                <button type="submit" name="accion" value="aceptar" 
+                                    class="btn <?php echo $bloqueado ? 'btn-secondary' : 'btn-success'; ?>"
+                                    <?php echo $bloqueado ? 'disabled' : ''; ?>
+                                    <?php echo !$bloqueado ? 'onclick="return confirm(\'¿Confirmas que deseas ACEPTAR esta solicitud?\')"' : ''; ?>>
+                                    ✅ Aceptar
                                 </button>
-                                
-                                <button type="submit" name="accion" value="rechazar" class="btn btn-danger">
-                                    <i class="bi bi-x-circle">Rechazar</i> 
+                                <button type="submit" name="accion" value="rechazar" 
+                                    class="btn <?php echo $bloqueado ? 'btn-secondary' : 'btn-danger'; ?>"
+                                    <?php echo $bloqueado ? 'disabled' : ''; ?>
+                                    <?php echo !$bloqueado ? 'onclick="return confirm(\'¿Confirmas que deseas RECHAZAR esta solicitud?\')"' : ''; ?>>
+                                    ❌ Rechazar
                                 </button>
                             </div>
                         </form>
@@ -126,7 +147,7 @@ $archivos = $stmtFiles->fetchAll();
     </div>
 
     <script>
-document.getElementById('formComentario').addEventListener('submit', function(e) {
+    document.getElementById('formComentario').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('btnEnviarComentario');
     const area = document.getElementById('textoComentario');

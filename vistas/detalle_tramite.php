@@ -51,7 +51,6 @@ if (isset($_GET['id'])) {
         </header>
     <main class="container mt-5">
         <h2 class="mb-4"><?php echo htmlspecialchars($t['titulo']); ?></h2>
-        
         <?php if (!$t_status): ?>
             <div class="card p-4 mb-4 shadow-sm">
                 <h5 class="text-info"><i class="bi bi-info-circle"></i> Instrucciones del Proceso</h5>
@@ -196,11 +195,17 @@ if (isset($_GET['id'])) {
                 <a href="alumno_tramites.php" class="btn btn-outline-danger">Regresar a mis trámites</a>
             </div>
 
-        <?php elseif ($t_status['estatus'] == 'Finalizada'): ?>
+            <?php elseif ($t_status['estatus'] == 'Finalizada'): ?>
             <div class="alert alert-success p-5 text-center shadow">
                 <h2>✨ ¡Trámite Finalizado!</h2>
                 <p>Tu prórroga ha sido aprobada y el proceso se ha completado correctamente.</p>
-                <a href="alumno_tramites.php" class="btn btn-outline-success">Volver al inicio</a>
+                <?php if (!empty($t_status['comentarios'])): ?>
+                    <div class="mt-3 text-start p-3 border border-success rounded">
+                        <h6 class="fw-bold">💬 Mensaje del área administrativa:</h6>
+                        <p class="mb-0"><?php echo htmlspecialchars($t_status['comentarios']); ?></p>
+                    </div>
+                <?php endif; ?>
+                <a href="alumno_tramites.php" class="btn btn-outline-success mt-3">Volver al inicio</a>
             </div>
         <?php endif; ?>
     </main>
