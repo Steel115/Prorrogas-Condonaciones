@@ -50,13 +50,13 @@ $archivos = $stmtFiles->fetchAll();
                     </div>
                 </div>
         <?php 
-        // Buscam si existe un archivo tipo 'pago'
-        $stmtPago = $pdo->prepare("SELECT * FROM expediente_archivos WHERE 
-        id_solicitud = ? AND tipo_archivo = 'pago'");
+        // Obtener todos los comprobantes de pago
+        $stmtPago = $pdo->prepare("SELECT * FROM expediente_archivos WHERE id_solicitud = ? AND tipo_archivo = 'pago'");
         $stmtPago->execute([$id_solicitud]);
-        $pago = $stmtPago->fetch();
+        $pagos = $stmtPago->fetchAll();
+        $totalPagos = count($pagos);
         ?>
-        <?php if ($pago): ?>
+        <?php if ($totalPagos > 0): ?>
         <div class="card mt-4 shadow-sm <?php echo ($solicitud['estatus'] == 'Finalizada') ? 'border-secondary' : 'border-success'; ?>">
             <div class="card-header <?php echo ($solicitud['estatus'] == 'Finalizada') ? 'bg-secondary' : 'bg-success'; ?> text-white">
                 <h5 class="mb-0">
@@ -66,16 +66,44 @@ $archivos = $stmtFiles->fetchAll();
             <div class="card-body text-center">
                 <?php if ($solicitud['estatus'] == 'Finalizada'): ?>
                     <p class="text-muted">Este trámite ha sido completado.</p>
-                    <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-secondary mb-3">
-                        🔍 Ver Comprobante de Pago
-                    </a>
-                    <br>
+                    <?php if ($totalPagos === 1): ?>
+                        <!-- Un solo comprobante — botón directo -->
+                        <a href="<?php echo $pagos[0]['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-secondary mb-3">
+                            🔍 Ver Comprobante de Pago
+                        </a>
+                    <?php else: ?>
+                        <!-- Varios comprobantes — lista -->
+                        <div class="list-group mb-3 text-start">
+                            <?php foreach ($pagos as $pago): ?>
+                                <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank"
+                                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span>🧾 <?php echo htmlspecialchars($pago['nombre_original']); ?></span>
+                                    <span class="btn btn-sm btn-outline-secondary">Ver</span>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                     <span class="badge bg-secondary fs-6 px-4 py-2">✔️ Proceso concluido</span>
+
                 <?php else: ?>
-                    <p>El alumno ha subido su voucher:</p>
-                    <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-success mb-3">
-                        🔍 Abrir Comprobante de Pago
-                    </a>
+                    <p>El alumno ha subido su<?php echo $totalPagos > 1 ? 's vouchers:' : ' voucher:'; ?></p>
+                    <?php if ($totalPagos === 1): ?>
+                        <!-- Un solo comprobante — botón directo -->
+                        <a href="<?php echo $pagos[0]['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-success mb-3">
+                            🔍 Abrir Comprobante de Pago
+                        </a>
+                    <?php else: ?>
+                        <!-- Varios comprobantes — lista -->
+                        <div class="list-group mb-3 text-start">
+                            <?php foreach ($pagos as $pago): ?>
+                                <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank"
+                                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span>🧾 <?php echo htmlspecialchars($pago['nombre_original']); ?></span>
+                                    <span class="btn btn-sm btn-outline-success">Ver</span>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                     <hr>
                     <form action="../auth/finalizar_tramite.php" method="POST">
                         <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">

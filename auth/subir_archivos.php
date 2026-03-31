@@ -6,16 +6,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['documentos'])) {
     $id_asignacion = $_POST['id_asignacion'];
     $num_control = $_SESSION['id'];
     $fecha_actual = date('Y-m-d_H-i-s');
-    
-    // archivos permitidos
     $permitidos = ['pdf', 'jpg', 'jpeg', 'png'];
 
     try {
         $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare("INSERT INTO solicitudes (id_asignacion, num_control_alumno, estatus) VALUES (?, ?, 'Pendiente')");
-        $stmt->execute([$id_asignacion, $num_control]);
-        $id_solicitud = $pdo->lastInsertId();
+        // ✅ Si ya existe solicitud la usa, si no crea una nueva
+        if (!empty($_POST['id_solicitud_existente'])) {
+            $id_solicitud = $_POST['id_solicitud_existente'];
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO solicitudes (id_asignacion, num_control_alumno, estatus) VALUES (?, ?, 'Pendiente')");
+            $stmt->execute([$id_asignacion, $num_control]);
+            $id_solicitud = $pdo->lastInsertId();
+        }
 
         $directorio_destino = "../uploads/" . $num_control . "/";
         if (!file_exists($directorio_destino)) {
@@ -23,6 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['documentos'])) {
         }
 
         foreach ($_FILES['documentos']['tmp_name'] as $key => $tmp_name) {
+            if ($_FILES['documentos']['error'][$key] !== UPLOAD_ERR_OK) continue;
+
             $nombre_original = $_FILES['documentos']['name'][$key];
             $extension = strtolower(pathinfo($nombre_original, PATHINFO_EXTENSION));
 
@@ -34,13 +39,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['documentos'])) {
             $ruta_final = $directorio_destino . $nombre_sistema;
 
             if (move_uploaded_file($tmp_name, $ruta_final)) {
-                $stmtFile = $pdo->prepare("INSERT INTO expediente_archivos (id_solicitud, nombre_archivo_sistema, nombre_original, ruta_fisica, subido_por) VALUES (?, ?, ?, ?, ?)");
+                $stmtFile = $pdo->prepare("INSERT INTO expediente_archivos 
+                    (id_solicitud, tipo_archivo, nombre_archivo_sistema, nombre_original, ruta_fisica, subido_por) 
+                    VALUES (?, 'requisito', ?, ?, ?, ?)");
                 $stmtFile->execute([$id_solicitud, $nombre_sistema, $nombre_original, $ruta_final, $num_control]);
             }
         }
 
+        // ✅ Si es una solicitud existente, limpiar comentario para que no siga apareciendo como observación
+        if (!empty($_POST['id_solicitud_existente'])) {
+            $pdo->prepare("UPDATE solicitudes SET comentarios = NULL WHERE id_solicitud = ?")->execute([$id_solicitud]);
+        }
+
         $pdo->commit();
-        header("Location: ../vistas/alumno_tramites.php?msg=Solicitud enviada con éxito");
+        header("Location: ../vistas/detalle_tramite.php?id=$id_asignacion&msg=Solicitud enviada con éxito");
 
     } catch (Exception $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
