@@ -18,6 +18,20 @@ if (isset($_GET['id'])) {
         header("Location: alumno_tramites.php");
         exit;
     }
+
+    // Bloquear acceso directo a asignaciones vencidas o archivadas
+    if ($t['estatus'] == 1 || $t['estatus'] == 2) {
+        // Solo permitir si ya tiene una solicitud activa en proceso
+        $stmtCheck = $pdo->prepare("SELECT estatus FROM solicitudes WHERE id_asignacion = ? AND num_control_alumno = ?");
+        $stmtCheck->execute([$id_asignacion, $num_control]);
+        $solicitudActiva = $stmtCheck->fetch();
+
+        // Si no tiene solicitud o ya está finalizada/rechazada, redirigir
+        if (!$solicitudActiva || in_array($solicitudActiva['estatus'], ['Finalizada', 'Rechazada', 'Deudor'])) {
+            header("Location: alumno_tramites.php?error=Esta asignación ya no está disponible.");
+            exit;
+        }
+    }
     $stmtStatus = $pdo->prepare("SELECT id_solicitud, estatus, comentarios FROM solicitudes WHERE id_asignacion = ? AND num_control_alumno = ?");
     $stmtStatus->execute([$id_asignacion, $num_control]);
     $t_status = $stmtStatus->fetch();
@@ -49,6 +63,20 @@ if (isset($_GET['id'])) {
 
 <main class="container mt-5">
     <h2 class="mb-4"><?php echo htmlspecialchars($t['titulo']); ?></h2>
+
+    <?php if (!empty($_GET['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            ⚠️ <?php echo htmlspecialchars($_GET['error']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($_GET['msg'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ✅ <?php echo htmlspecialchars($_GET['msg']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 
     <?php if (!$t_status): ?>
     <!-- ESTADO: Sin solicitud — Aceptar términos y subir -->
@@ -100,7 +128,7 @@ if (isset($_GET['id'])) {
         </div>
 
     <?php elseif ($t_status['estatus'] == 'Deudor'): ?>
-    <!-- ESTADO: Deudor -->
+    <!-- Deudor -->
         <div class="alert alert-danger p-5 text-center shadow">
             <h2>⚠️ Estatus: DEUDOR</h2>
             <p class="lead">Se ha detectado una irregularidad en tu proceso.</p>
@@ -110,7 +138,7 @@ if (isset($_GET['id'])) {
         </div>
 
     <?php elseif ($t_status['estatus'] == 'Pendiente' || $t_status['estatus'] == 'En revisión'): ?>
-    <!-- ESTADO: Pendiente / En revisión -->
+    <!-- Pendiente / En revisión -->
         <div class="alert alert-light border p-4 shadow-sm">
             <h4 class="text-center mb-4">🕐 Estado del Trámite</h4>
 
@@ -182,7 +210,7 @@ if (isset($_GET['id'])) {
         </div>
 
     <?php elseif ($t_status['estatus'] == 'Pago pendiente'): ?>
-    <!-- ESTADO: Pago pendiente -->
+    <!-- Pago pendiente -->
         <div class="card p-4 shadow-sm border-success">
             <h5 class="text-success fw-bold">✅ Solicitud Aceptada</h5>
             <p>Tu documentación ha sido aprobada. Por favor, sube tu <strong>comprobante de pago</strong> para finalizar.</p>
@@ -223,7 +251,7 @@ if (isset($_GET['id'])) {
         </div>
 
     <?php elseif ($t_status['estatus'] == 'Validando pago'): ?>
-    <!-- ESTADO: Validando pago -->
+    <!-- Validando pago -->
         <?php if (!empty($t_status['comentarios'])): ?>
             <!-- Con comentario: mostrar comprobantes actuales + opción de quitar/subir nuevos -->
             <div class="card p-4 shadow-sm border-warning">
@@ -309,7 +337,7 @@ if (isset($_GET['id'])) {
         </div>
 
     <?php elseif ($t_status['estatus'] == 'Finalizada'): ?>
-    <!-- ESTADO: Finalizada -->
+    <!-- Finalizada -->
         <div class="alert alert-success p-5 text-center shadow">
             <h2>✨ ¡Trámite Finalizado!</h2>
             <p>Tu prórroga ha sido aprobada y el proceso se ha completado correctamente.</p>
@@ -321,7 +349,6 @@ if (isset($_GET['id'])) {
             <?php endif; ?>
             <a href="alumno_tramites.php" class="btn btn-outline-success mt-3">Volver al inicio</a>
         </div>
-
     <?php endif; ?>
 </main>
 
@@ -343,10 +370,6 @@ if (isset($_GET['id'])) {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ══════════════════════════════════════════
-// ACUMULADOR GENÉRICO DE ARCHIVOS
-// Mismo concepto para los 3 formularios
-// ══════════════════════════════════════════
 function crearAcumulador(cfg) {
     const inputVisible = document.getElementById(cfg.inputVisibleId);
     const inputReal    = document.getElementById(cfg.inputRealId);
@@ -369,9 +392,7 @@ function crearAcumulador(cfg) {
         Array.from(inputVisible.files).forEach(file => {
             const existe = Array.from(dt.files).some(f => f.name === file.name);
             if (existe) return;
-
             dt.items.add(file);
-
             const safeId = cfg.listaId + '_' + file.name.replace(/[^a-z0-9]/gi, '_');
             const li = document.createElement('li');
             li.className = 'list-group-item d-flex justify-content-between align-items-center small';
@@ -383,8 +404,6 @@ function crearAcumulador(cfg) {
             `;
             lista.appendChild(li);
         });
-
-        // Sincronizar con el input real
         const nuevodt = new DataTransfer();
         Array.from(dt.files).forEach(f => nuevodt.items.add(f));
         inputReal.files = nuevodt.files;
@@ -400,7 +419,6 @@ function crearAcumulador(cfg) {
             alert('Agrega al menos un archivo antes de enviar.');
             return;
         }
-        // Sincronizar input real justo antes de enviar
         const nuevodt = new DataTransfer();
         Array.from(dt.files).forEach(f => nuevodt.items.add(f));
         inputReal.files = nuevodt.files;
@@ -410,33 +428,24 @@ function crearAcumulador(cfg) {
         if (barra) barra.classList.remove('d-none');
     });
 
-    // Guardar referencia al DataTransfer en el elemento para poder modificarlo después
     form.dataset.acumuladorId = cfg.formId;
     window['dt_' + cfg.formId] = dt;
-
     return dt;
 }
 
 function quitarArchivo(safeId, nombre, listaId, inputRealId, btnEnviarId, formId) {
     const dt = window['dt_' + formId];
     if (!dt) return;
-
     const nuevo = new DataTransfer();
     Array.from(dt.files).forEach(f => {
         if (f.name !== nombre) nuevo.items.add(f);
     });
-
-    // Reemplazar el DataTransfer global
     while (dt.items.length > 0) dt.items.remove(0);
     Array.from(nuevo.files).forEach(f => dt.items.add(f));
-
-    // Sincronizar input real
     const inputReal = document.getElementById(inputRealId);
     const sync = new DataTransfer();
     Array.from(dt.files).forEach(f => sync.items.add(f));
     inputReal.files = sync.files;
-
-    // Quitar elemento visual
     const li = document.getElementById(safeId);
     if (li) li.remove();
 
@@ -488,9 +497,6 @@ crearAcumulador({
     barraId: 'barraProgresoNuevoPago'
 });
 
-// ══════════════════════════════════════════
-// TÉRMINOS Y CONDICIONES
-// ══════════════════════════════════════════
 document.getElementById('btnAcepto')?.addEventListener('click', function() {
     document.getElementById('seccionTerminos').classList.add('d-none');
     document.getElementById('seccionSubida').classList.remove('d-none');
@@ -500,9 +506,6 @@ document.getElementById('btnNoAcepto')?.addEventListener('click', function() {
     window.location.href = 'alumno_tramites.php';
 });
 
-// ══════════════════════════════════════════
-// ELIMINAR ARCHIVO EXISTENTE (AJAX)
-// ══════════════════════════════════════════
 function eliminarArchivo(idArchivo, boton) {
     if (!confirm('¿Deseas quitar este archivo?')) return;
     boton.disabled = true;

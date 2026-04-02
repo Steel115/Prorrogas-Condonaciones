@@ -16,6 +16,20 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <h3 class="card-title text-center">Inicio de sesión</h3>
+
+                        <?php if (!empty($_GET['msg'])): ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                ✅ <?php echo htmlspecialchars($_GET['msg']); ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($_GET['error'])): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                ⚠️ <?php echo htmlspecialchars($_GET['error']); ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
                         <form action="../auth/login_process.php" method="POST">
                             <div class="mb-3">
                                 <label class="form-label">Número de Control / Trabajador</label>

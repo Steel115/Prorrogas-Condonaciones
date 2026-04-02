@@ -5,7 +5,6 @@
     <title>Registro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-
 <body class="bg-light">
     <main class="container mt-5">
         <div class="row justify-content-center">
@@ -13,6 +12,14 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <h3 class="card-title text-center">Registro de Alumno</h3>
+
+                        <?php if (!empty($_GET['error'])): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                ⚠️ <?php echo htmlspecialchars($_GET['error']); ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
                         <form action="../auth/registro.php" method="POST">
                             <div class="mb-3">
                                 <label class="form-label">Nombre Completo</label>
@@ -41,9 +48,7 @@
             </div>
         </div>
     </main>
-    <footer class="mt-auto py-3 bg-white border-top fixed-bottom">
-        
-    </footer>
+    <footer class="mt-auto py-3 bg-white border-top fixed-bottom"></footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

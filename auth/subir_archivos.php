@@ -1,12 +1,12 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../includes/validar_archivo.php'; // ✅ Validación centralizada
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['documentos'])) {
     $id_asignacion = $_POST['id_asignacion'];
     $num_control = $_SESSION['id'];
     $fecha_actual = date('Y-m-d_H-i-s');
-    $permitidos = ['pdf', 'jpg', 'jpeg', 'png'];
 
     try {
         $pdo->beginTransaction();
@@ -26,14 +26,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['documentos'])) {
         }
 
         foreach ($_FILES['documentos']['tmp_name'] as $key => $tmp_name) {
-            if ($_FILES['documentos']['error'][$key] !== UPLOAD_ERR_OK) continue;
+            if ($_FILES['documentos']['error'][$key] !== UPLOAD_ERR_OK) {
+                // ✅ Error de tamaño detectado por PHP antes de llegar al servidor
+                if ($_FILES['documentos']['error'][$key] === UPLOAD_ERR_INI_SIZE || 
+                    $_FILES['documentos']['error'][$key] === UPLOAD_ERR_FORM_SIZE) {
+                    throw new Exception("Uno de los archivos excede el tamaño máximo permitido de 5MB.");
+                }
+                continue;
+            }
 
             $nombre_original = $_FILES['documentos']['name'][$key];
-            $extension = strtolower(pathinfo($nombre_original, PATHINFO_EXTENSION));
 
-            if (!in_array($extension, $permitidos)) {
-                throw new Exception("El archivo '{$nombre_original}' no es válido. Solo se permiten: " . implode(", ", $permitidos));
-            }
+            // ✅ Validación segura: MIME type real + tamaño + extensión
+            $extension = validarArchivo($tmp_name, $nombre_original);
 
             $nombre_sistema = $num_control . "_Asig" . $id_asignacion . "_" . $key . "_" . $fecha_actual . "." . $extension;
             $ruta_final = $directorio_destino . $nombre_sistema;
@@ -46,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['documentos'])) {
             }
         }
 
-        // ✅ Si es una solicitud existente, limpiar comentario para que no siga apareciendo como observación
+        // ✅ Si es una solicitud existente, limpiar comentario
         if (!empty($_POST['id_solicitud_existente'])) {
             $pdo->prepare("UPDATE solicitudes SET comentarios = NULL WHERE id_solicitud = ?")->execute([$id_solicitud]);
         }
@@ -56,6 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['documentos'])) {
 
     } catch (Exception $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
-        die("Error al subir archivos: " . $e->getMessage());
+        // ✅ Redirigir con mensaje de error amigable en lugar de die()
+        header("Location: ../vistas/detalle_tramite.php?id=$id_asignacion&error=" . urlencode($e->getMessage()));
+        exit;
     }
 }

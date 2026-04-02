@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+date_default_timezone_set('America/Mexico_City'); // ✅ Zona horaria correcta
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($_SESSION['rol'] !== 'admin') {
@@ -11,7 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $instrucciones = $_POST['instrucciones'];
     $terminos = $_POST['terminos'];
     $ciclo = $_POST['ciclo_escolar'];
-    $fecha_limite = $_POST['fecha_limite'];
+    // ✅ Convertir formato datetime-local a MySQL
+    $fecha_limite = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $_POST['fecha_limite'])));
     $creado_por = $_SESSION['id'];
 
     try {

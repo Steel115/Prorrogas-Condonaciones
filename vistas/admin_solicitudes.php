@@ -12,7 +12,7 @@ $sql = "SELECT s.id_solicitud, a.titulo, al.nombre_completo, al.num_control,
         FROM solicitudes s
         JOIN asignaciones a ON s.id_asignacion = a.id_asignacion
         JOIN alumnos al ON s.num_control_alumno = al.num_control
-        WHERE a.estatus = 0 
+        WHERE a.estatus IN (0, 2)
         ORDER BY s.fecha_envio DESC";
 
 $stmt = $pdo->prepare($sql);
@@ -102,13 +102,13 @@ $solicitudes = $stmt->fetchAll();
                                 <a href="revisar_solicitud.php?id=<?php echo $s['id_solicitud']; ?>" 
                                    class="btn btn-sm btn-primary">Revisar</a>
                                 
-                                <!--<button class="btn btn-sm btn-success">Finalizar</button>-->
-                                
+                                <?php if (!in_array($s['estatus'], ['Finalizada', 'Rechazada'])): ?>
                                 <a href="../auth/marcar_deudor.php?id=<?php echo $s['id_solicitud']; ?>" 
                                 class="btn btn-sm btn-danger"
                                 onclick="return confirm('¿Confirmas que deseas marcar a este alumno como DEUDOR?');">
                                 Deudor
                                 </a>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>

@@ -1,6 +1,7 @@
 <?php 
 require_once '../config/db.php';
 require_once '../includes/auth_check.php';
+require_once '../includes/verificar_vencimientos.php'; // ✅ Auto-cierra asignaciones vencidas
 
 permitirAcceso(['admin']);
 ?>
@@ -58,17 +59,27 @@ permitirAcceso(['admin']);
         
         <div class="row">
             <?php
-            $stmt = $pdo->prepare("SELECT * FROM asignaciones WHERE estatus = 0 ORDER BY fecha_creacion DESC");
+            // ✅ Traer activas (0) y vencidas (2)
+            $stmt = $pdo->prepare("SELECT * FROM asignaciones WHERE estatus IN (0, 2) ORDER BY fecha_creacion DESC");
             $stmt->execute();
             $asignaciones = $stmt->fetchAll();
 
-            foreach ($asignaciones as $asig): ?>
+            foreach ($asignaciones as $asig):
+                $vencida = ($asig['estatus'] == 2);
+            ?>
                 <div class="col-md-4 mb-3">
-                    <div class="card shadow-sm border-primary">
+                    <div class="card shadow-sm <?php echo $vencida ? 'border-danger opacity-75' : 'border-primary'; ?>">
                         <div class="card-body">
-                            <h5 class="card-title"><?php echo htmlspecialchars($asig['titulo']); ?></h5>
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h5 class="card-title mb-0"><?php echo htmlspecialchars($asig['titulo']); ?></h5>
+                                <?php if ($vencida): ?>
+                                    <span class="badge bg-danger ms-2">⏰ Vencida</span>
+                                <?php endif; ?>
+                            </div>
                             <p class="text-muted mb-1"><strong>Ciclo:</strong> <?php echo $asig['ciclo_escolar']; ?></p>
-                            <p class="text-danger small"><strong>Fecha Límite:</strong> <?php echo date('d/m/Y H:i', strtotime($asig['fecha_limite'])); ?></p>
+                            <p class="<?php echo $vencida ? 'text-danger fw-bold' : 'text-danger'; ?> small">
+                                <strong>Fecha Límite:</strong> <?php echo date('d/m/Y H:i', strtotime($asig['fecha_limite'])); ?>
+                            </p>
                             <div class="d-flex justify-content-end gap-2 mt-3">
                                 <button class="btn btn-outline-primary btn-sm" 
                                         data-bs-toggle="modal" 
@@ -90,7 +101,8 @@ permitirAcceso(['admin']);
                                 <a href="../auth/eliminar_asignacion.php?id=<?php echo $asig['id_asignacion']; ?>" 
                                 class="btn btn-outline-danger btn-sm" 
                                 onclick="return confirm('¡ADVERTENCIA! Esta acción borrará el trámite PERMANENTEMENTE de la base de datos. ¿Deseas continuar?');">
-                                ❌ </a>
+                                ❌
+                                </a>
                             </div>
                         </div>
                     </div>

@@ -6,12 +6,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = $_POST['nombre_completo'];
     $pass = $_POST['password'];
 
-    // Revisa si el alumno esta en la base de datos de Tec
+    // Revisa si el alumno está en la base de datos del Tec
     $checkEstudiante = $pdo->prepare("SELECT num_control FROM bd_estudiantes WHERE num_control = ?");
     $checkEstudiante->execute([$num_control]);
-    
+
     if ($checkEstudiante->rowCount() === 0) {
-        die("Error: El número de control no existe en el sistema escolar.");
+        header("Location: ../vistas/registro.php?error=" . urlencode("El número de control no existe en el sistema escolar."));
+        exit;
     }
 
     // Revisa si no se ha registrado antes
@@ -19,19 +20,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $checkRegistro->execute([$num_control]);
 
     if ($checkRegistro->rowCount() > 0) {
-        die("Error: Este alumno ya tiene una cuenta creada.");
+        header("Location: ../vistas/registro.php?error=" . urlencode("Este número de control ya tiene una cuenta creada."));
+        exit;
     }
 
-    // Se encripta la contraseña
+    // Encriptar contraseña y registrar
     $passwordHash = password_hash($pass, PASSWORD_BCRYPT);
 
-    // Los registra en la tabla de alumnos de la base de datos del sistema
     try {
         $stmt = $pdo->prepare("INSERT INTO alumnos (num_control, nombre_completo, password) VALUES (?, ?, ?)");
         $stmt->execute([$num_control, $nombre, $passwordHash]);
-        
-        echo "¡Registro exitoso! Ahora puedes iniciar sesión.";
+
+        // ✅ Redirigir al login con mensaje de éxito
+        header("Location: ../vistas/login.php?msg=" . urlencode("¡Registro exitoso! Ya puedes iniciar sesión."));
+        exit;
+
     } catch (PDOException $e) {
-        echo "Error al registrar: " . $e->getMessage();
+        header("Location: ../vistas/registro.php?error=" . urlencode("Error al registrar. Intenta de nuevo."));
+        exit;
     }
 }
