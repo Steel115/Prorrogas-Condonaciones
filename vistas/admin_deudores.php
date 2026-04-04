@@ -1,8 +1,8 @@
 <?php 
 require_once '../config/db.php'; 
-include '../includes/auth_check.php'; 
 require_once '../includes/auth_check.php';
 permitirAcceso(['admin', 'contribuyente']);
+include '../includes/header.php';
 
 $sql = "SELECT s.id_solicitud, al.nombre_completo, al.num_control, a.titulo, s.ultima_modificacion 
         FROM solicitudes s
@@ -20,43 +20,11 @@ $deudores = $stmt->fetchAll();
     <meta charset="UTF-8">
     <title>Iniciar sesión</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .nav-tabs .nav-link.active {
-            border-bottom: 3px solid #007bff;
-            color: #007bff;
-        }
-    </style>
 </head>
 
 <body class="bg-light">
-    <header class="p-3 bg-white border-bottom shadow-sm">
-        <div class="container d-flex justify-content-between align-items-center">
-            <span><strong>ADMINISTRADOR:</strong> <?php echo $_SESSION['nombre']; ?></span>
-            <a href="../auth/logout.php" class="btn btn-sm btn-outline-danger ms-2">Cerrar Sesión</a>
-        </div>
-    </header>
     <main class="container mt-4">
         <div class="container mt-4">
-            <ul class="nav nav-tabs mb-4">
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_dashboard.php') ? 'active' : ''; ?>" href="admin_dashboard.php">Asignaciones</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_usuarios.php') ? 'active' : ''; ?>" href="admin_usuarios.php">Usuarios</a>
-                    </li>
-                <?php endif; ?>
-                
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_solicitudes.php') ? 'active' : ''; ?>" href="admin_solicitudes.php">Solicitudes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_historial.php') ? 'active' : ''; ?>" href="admin_historial.php">Historial</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_deudores.php') ? 'active' : ''; ?>" href="admin_deudores.php">Deudores</a>
-                </li>
-            </ul>
             <h3 class="text-danger">Lista de Deudores</h3>
             <div class="card shadow">
                 <div class="card-body">
@@ -78,9 +46,12 @@ $deudores = $stmt->fetchAll();
                                 <td><?php echo htmlspecialchars($d['titulo']); ?></td>
                                 <td><?php echo date('d/m/Y', strtotime($d['ultima_modificacion'])); ?></td>
                                 <td>
-                                    <a href="../auth/quitar_deudor.php?id=<?php echo $d['id_solicitud']; ?>" class="btn btn-sm btn-success">
+                                    <button type="button"
+                                        class="btn btn-sm btn-success btn-quitar-deuda"
+                                        data-url="../auth/quitar_deudor.php?id=<?php echo $d['id_solicitud']; ?>"
+                                        data-nombre="<?php echo htmlspecialchars($d['nombre_completo'], ENT_QUOTES); ?>">
                                         Quitar deuda
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -90,9 +61,22 @@ $deudores = $stmt->fetchAll();
             </div>
         </div>
     </main>
-    <footer class="mt-auto py-3 bg-white border-top fixed-bottom">
-        
-    </footer>
+    <?php include '../includes/footer.php'; ?>
+
+    <?php include 'modales/modal_confirmacion.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.querySelectorAll('.btn-quitar-deuda').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            const nombre = this.getAttribute('data-nombre');
+            confirmarAccion(
+                '¿Confirmas que deseas quitar la deuda de ' + nombre + '?',
+                function() { window.location.href = url; },
+                'success'
+            );
+        });
+    });
+    </script>
 </body>
 </html>

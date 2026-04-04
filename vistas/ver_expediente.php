@@ -2,6 +2,7 @@
 require_once '../config/db.php'; 
 require_once '../includes/auth_check.php';
 permitirAcceso(['admin', 'contribuyente']);
+include '../includes/header.php';
 
 $num_control = $_GET['num_control'];
 
@@ -40,16 +41,15 @@ $solicitudes = $stmtSol->fetchAll();
     <meta charset="UTF-8">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Expediente - <?php echo $num_control; ?></title>
-    <style>
-        body { background-color: #f4f7f6; padding: 20px; }
-        .card-alumno { border-left: 5px solid #007bff; }
-    </style>
 </head>
 <body>
 
 <div class="container">
-    <a href="admin_historial.php" class="btn btn-sm btn-outline-secondary mb-3">← Volver</a>
-
+    <div class="d-block mb-2 mt-3">
+        <a href="admin_historial.php" class="btn btn-sm btn-outline-secondary mb-3">
+            ← Volver
+        </a>
+    </div>
     <div class="card shadow-sm mb-4 card-alumno">
         <div class="card-body">
             <div class="row align-items-center">
@@ -114,6 +114,7 @@ $solicitudes = $stmtSol->fetchAll();
 
     </div>
 </div>
+<?php include '../includes/footer.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

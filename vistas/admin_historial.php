@@ -2,6 +2,8 @@
 require_once '../config/db.php'; 
 require_once '../includes/auth_check.php';
 permitirAcceso(['admin', 'contribuyente']);
+include '../includes/header.php';
+
 $busqueda = isset($_GET['buscar']) ? $_GET['buscar'] : '';
 $sql = "SELECT 
             a.num_control, 
@@ -27,44 +29,12 @@ $alumnos = $stmt->fetchAll();
     <title>Historial de Alumnos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <style>
-        .nav-tabs .nav-link.active {
-            border-bottom: 3px solid #007bff;
-            color: #007bff;
-        }
-    </style>
 </head>
 <body class="bg-light">
-    <header class="p-3 bg-white border-bottom shadow-sm">
-        <div class="container d-flex justify-content-between align-items-center">
-            <span><strong>ADMINISTRADOR:</strong> <?php echo $_SESSION['nombre']; ?></span>
-            <a href="../auth/logout.php" class="btn btn-sm btn-outline-danger ms-2">Cerrar Sesión</a>
-        </div>
-    </header>
     <div class="container mt-4">
-        <ul class="nav nav-tabs mb-4">
-            <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_dashboard.php') ? 'active' : ''; ?>" href="admin_dashboard.php">Asignaciones</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_usuarios.php') ? 'active' : ''; ?>" href="admin_usuarios.php">Usuarios</a>
-                </li>
-            <?php endif; ?>
-            <li class="nav-item">
-                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_solicitudes.php') ? 'active' : ''; ?>" href="admin_solicitudes.php">Solicitudes</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_historial.php') ? 'active' : ''; ?>" href="admin_historial.php">Historial</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_deudores.php') ? 'active' : ''; ?>" href="admin_deudores.php">Deudores</a>
-            </li>
-        </ul>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3>Control de Expedientes</h3>
         </div>
-
         <div class="card mb-4 shadow-sm">
             <div class="card-body">
                 <form method="GET" class="row g-2">
@@ -126,5 +96,6 @@ $alumnos = $stmt->fetchAll();
             </div>
         </div>
     </div>
+    <?php include '../includes/footer.php'; ?>
 </body>
 </html>

@@ -1,7 +1,8 @@
 <?php 
 require_once '../config/db.php'; 
 require_once '../includes/auth_check.php';
-require_once '../includes/verificar_vencimientos.php'; // ✅ Auto-cierra asignaciones vencidas
+require_once '../includes/verificar_vencimientos.php'; // cierra asignaciones vencidas
+include '../includes/header.php';
 
 if ($_SESSION['rol'] !== 'alumno') {
     header("Location: ../login.php");
@@ -16,23 +17,8 @@ if ($_SESSION['rol'] !== 'alumno') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-
-    <header class="p-3 bg-white border-bottom shadow-sm">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="h4 mb-0 text-primary">Sistema de Prorrogas y Condonaciones</h1>
-            </div>
-            <div class="text-end">
-                <span class="fw-bold d-block"><?php echo htmlspecialchars($_SESSION['nombre']); ?></span>
-                <small class="text-muted">Control: <?php echo $_SESSION['id']; ?></small>
-                <a href="../auth/logout.php" class="btn btn-sm btn-outline-danger ms-2">Cerrar Sesión</a>
-            </div>
-        </div>
-    </header>
-
     <main class="container mt-5">
         <h2 class="mb-4">Trámites Disponibles</h2>
-
         <?php if (!empty($_GET['error'])): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 ⚠️ <?php echo htmlspecialchars($_GET['error']); ?>
@@ -95,22 +81,7 @@ if ($_SESSION['rol'] !== 'alumno') {
         </div>
     </main>
 
-    <footer class="mt-auto py-3 bg-white border-top">
-        <div class="container text-center">
-            <div class="dropup">
-                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    Recursos Útiles
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="https://www.ilovepdf.com/es" target="_blank">I Love PDF (Comprimir/Unir)</a></li>
-                    <li><a class="dropdown-item" href="#">Manual de Usuario</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><span class="dropdown-item-text small text-muted">Versión 1.0</span></li>
-                </ul>
-            </div>
-        </div>
-    </footer>
-
+    <?php include '../includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

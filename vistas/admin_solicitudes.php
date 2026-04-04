@@ -2,6 +2,7 @@
 require_once '../config/db.php';  
 require_once '../includes/auth_check.php';
 permitirAcceso(['admin', 'contribuyente']);
+include '../includes/header.php';
 
 if ($_SESSION['rol'] !== 'admin' && $_SESSION['rol'] !== 'contribuyente') {
     header("Location: ../login.php");
@@ -26,42 +27,11 @@ $solicitudes = $stmt->fetchAll();
     <meta charset="UTF-8">
     <title>Solicitudes Recibidas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .nav-tabs .nav-link.active {
-            border-bottom: 3px solid #007bff;
-            color: #007bff;
-        }
-    </style>
 </head>
-<header class="p-3 bg-white border-bottom shadow-sm">
-        <div class="container d-flex justify-content-between align-items-center">
-            <span><strong>ADMINISTRADOR:</strong> <?php echo $_SESSION['nombre']; ?></span>
-            <a href="../auth/logout.php" class="btn btn-sm btn-outline-danger ms-2">Cerrar Sesión</a>
-        </div>
-</header>
+
 <body class="bg-light">
     <div class="container mt-4">
-        <ul class="nav nav-tabs mb-4">
-            <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_dashboard.php') ? 'active' : ''; ?>" href="admin_dashboard.php">Asignaciones</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_usuarios.php') ? 'active' : ''; ?>" href="admin_usuarios.php">Usuarios</a>
-                </li>
-            <?php endif; ?>
-            <li class="nav-item">
-                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_solicitudes.php') ? 'active' : ''; ?>" href="admin_solicitudes.php">Solicitudes</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_historial.php') ? 'active' : ''; ?>" href="admin_historial.php">Historial</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_deudores.php') ? 'active' : ''; ?>" href="admin_deudores.php">Deudores</a>
-            </li>
-        </ul>
         <h3 class="mb-4">Solicitudes Recibidas</h3>
-        
         <div class="card shadow">
             <div class="card-body">
                 <table class="table table-hover align-middle">
@@ -103,11 +73,12 @@ $solicitudes = $stmt->fetchAll();
                                    class="btn btn-sm btn-primary">Revisar</a>
                                 
                                 <?php if (!in_array($s['estatus'], ['Finalizada', 'Rechazada'])): ?>
-                                <a href="../auth/marcar_deudor.php?id=<?php echo $s['id_solicitud']; ?>" 
-                                class="btn btn-sm btn-danger"
-                                onclick="return confirm('¿Confirmas que deseas marcar a este alumno como DEUDOR?');">
-                                Deudor
-                                </a>
+                                <button type="button"
+                                    class="btn btn-sm btn-danger btn-deudor"
+                                    data-url="../auth/marcar_deudor.php?id=<?php echo $s['id_solicitud']; ?>"
+                                    data-nombre="<?php echo htmlspecialchars($s['nombre_completo'], ENT_QUOTES); ?>">
+                                    Deudor
+                                </button>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -117,5 +88,22 @@ $solicitudes = $stmt->fetchAll();
             </div>
         </div>
     </div>
+    <?php include '../includes/footer.php'; ?>
+
+    <?php include 'modales/modal_confirmacion.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.querySelectorAll('.btn-deudor').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            const nombre = this.getAttribute('data-nombre');
+            confirmarAccion(
+                '¿Confirmas que deseas marcar a ' + nombre + ' como DEUDOR?',
+                function() { window.location.href = url; },
+                'danger'
+            );
+        });
+    });
+    </script>
 </body>
 </html>

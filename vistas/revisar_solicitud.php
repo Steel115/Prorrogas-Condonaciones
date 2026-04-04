@@ -2,6 +2,7 @@
 require_once '../config/db.php'; 
 require_once '../includes/auth_check.php';
 permitirAcceso(['admin', 'contribuyente']);
+include '../includes/header.php';
 
 $id_solicitud = $_GET['id'];
 
@@ -29,7 +30,11 @@ $archivos = $stmtFiles->fetchAll();
 </head>
 <body class="bg-light">
     <div class="container mt-4">
-        <a href="admin_solicitudes.php" class="btn btn-sm btn-outline-secondary mb-3">← Volver</a>
+        <div class="d-block mb-2 mt-3">
+            <a href="admin_solicitudes.php" class="btn btn-sm btn-outline-secondary mb-3">
+                ← Volver
+            </a>
+        </div>
         <div class="row">
             <div class="col-md-8">
                 <div class="card shadow-sm mb-4">
@@ -105,10 +110,14 @@ $archivos = $stmtFiles->fetchAll();
                         </div>
                     <?php endif; ?>
                     <hr>
-                    <form action="../auth/finalizar_tramite.php" method="POST">
+                    <form action="../auth/finalizar_tramite.php" method="POST" id="formFinalizar">
                         <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
-                        <button type="submit" class="btn btn-success btn-lg w-100"
-                            onclick="return confirm('¿Confirmas que deseas FINALIZAR este trámite?')">
+                        <div class="mb-3 text-start">
+                            <label class="form-label small text-muted">Mensaje final para el alumno (opcional)</label>
+                            <textarea name="comentario_dictamen" class="form-control form-control-sm" rows="2"
+                                placeholder="Ej: Tu trámite ha sido completado exitosamente..."></textarea>
+                        </div>
+                        <button type="button" id="btnFinalizar" class="btn btn-success btn-lg w-100">
                             ✅ Validar y Finalizar Trámite
                         </button>
                     </form>
@@ -151,19 +160,18 @@ $archivos = $stmtFiles->fetchAll();
                         $estatusActual = $solicitud['estatus'];
                         $bloqueado = in_array($estatusActual, ['Pago pendiente', 'Rechazada', 'Validando pago', 'Finalizada']);
                         ?>
-                        <form action="../auth/procesar_dictamen.php" method="POST">
+                        <form action="../auth/procesar_dictamen.php" method="POST" id="formDictamen">
                             <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
+                            <input type="hidden" name="accion" id="accionDictamen">
                             <div class="d-grid gap-2">
-                                <button type="submit" name="accion" value="aceptar" 
+                                <button type="button"
                                     class="btn <?php echo $bloqueado ? 'btn-secondary' : 'btn-success'; ?>"
-                                    <?php echo $bloqueado ? 'disabled' : ''; ?>
-                                    <?php echo !$bloqueado ? 'onclick="return confirm(\'¿Confirmas que deseas ACEPTAR esta solicitud?\')"' : ''; ?>>
+                                    <?php echo $bloqueado ? 'disabled' : 'id="btnAceptar"'; ?>>
                                     ✅ Aceptar
                                 </button>
-                                <button type="submit" name="accion" value="rechazar" 
+                                <button type="button"
                                     class="btn <?php echo $bloqueado ? 'btn-secondary' : 'btn-danger'; ?>"
-                                    <?php echo $bloqueado ? 'disabled' : ''; ?>
-                                    <?php echo !$bloqueado ? 'onclick="return confirm(\'¿Confirmas que deseas RECHAZAR esta solicitud?\')"' : ''; ?>>
+                                    <?php echo $bloqueado ? 'disabled' : 'id="btnRechazar"'; ?>>
                                     ❌ Rechazar
                                 </button>
                             </div>
@@ -174,6 +182,46 @@ $archivos = $stmtFiles->fetchAll();
         </div>
     </div>
 
+    <?php include 'modales/modal_confirmacion.php'; ?>
+    <?php include '../includes/footer.php'; ?>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Botón Aceptar
+    document.getElementById('btnAceptar')?.addEventListener('click', function() {
+        confirmarAccion(
+            '¿Confirmas que deseas ACEPTAR esta solicitud?',
+            function() {
+                document.getElementById('accionDictamen').value = 'aceptar';
+                document.getElementById('formDictamen').submit();
+            },
+            'success'
+        );
+    });
+
+    // Botón Rechazar
+    document.getElementById('btnRechazar')?.addEventListener('click', function() {
+        confirmarAccion(
+            '¿Confirmas que deseas RECHAZAR esta solicitud?',
+            function() {
+                document.getElementById('accionDictamen').value = 'rechazar';
+                document.getElementById('formDictamen').submit();
+            },
+            'danger'
+        );
+    });
+
+    // Botón Finalizar
+    document.getElementById('btnFinalizar')?.addEventListener('click', function() {
+        confirmarAccion(
+            '¿Confirmas que deseas FINALIZAR este trámite? Esta acción no se puede deshacer.',
+            function() {
+                document.getElementById('formFinalizar').submit();
+            },
+            'success'
+        );
+    });
+    </script>
     <script>
     document.getElementById('formComentario').addEventListener('submit', function(e) {
     e.preventDefault();

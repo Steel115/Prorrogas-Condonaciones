@@ -1,9 +1,9 @@
 <?php 
 require_once '../config/db.php';
 require_once '../includes/auth_check.php';
-require_once '../includes/verificar_vencimientos.php'; // ✅ Auto-cierra asignaciones vencidas
-
+require_once '../includes/verificar_vencimientos.php'; // Auto-cierra asignaciones vencidas
 permitirAcceso(['admin']);
+include '../includes/header.php';
 ?>
 
 <!DOCTYPE html>
@@ -12,44 +12,10 @@ permitirAcceso(['admin']);
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .nav-tabs .nav-link.active {
-            border-bottom: 3px solid #007bff;
-            color: #007bff;
-        }
-    </style>
 </head>
 <body class="bg-light">
-
-    <header class="p-3 bg-white border-bottom shadow-sm">
-        <div class="container d-flex justify-content-between align-items-center">
-            <span><strong>ADMINISTRADOR:</strong> <?php echo $_SESSION['nombre']; ?></span>
-            <a href="../auth/logout.php" class="btn btn-sm btn-outline-danger ms-2">Cerrar Sesión</a>
-        </div>
-    </header>
-
     <div class="container mt-4">
-        <ul class="nav nav-tabs mb-4">
-            <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_dashboard.php') ? 'active' : ''; ?>" href="admin_dashboard.php">Asignaciones</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_usuarios.php') ? 'active' : ''; ?>" href="admin_usuarios.php">Usuarios</a>
-                </li>
-            <?php endif; ?>
-            
-            <li class="nav-item">
-                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_solicitudes.php') ? 'active' : ''; ?>" href="admin_solicitudes.php">Solicitudes</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_historial.php') ? 'active' : ''; ?>" href="admin_historial.php">Historial</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'admin_deudores.php') ? 'active' : ''; ?>" href="admin_deudores.php">Deudores</a>
-            </li>
-        </ul>
-
+        
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>Asignaciones Activas</h4>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNuevaAsignacion">
@@ -85,24 +51,26 @@ permitirAcceso(['admin']);
                                         data-bs-toggle="modal" 
                                         data-bs-target="#modalEditarAsignacion"
                                         data-id="<?php echo $asig['id_asignacion']; ?>"
-                                        data-titulo="<?php echo htmlspecialchars($asig['titulo']); ?>"
-                                        data-ciclo="<?php echo htmlspecialchars($asig['ciclo_escolar']); ?>"
+                                        data-titulo="<?php echo htmlspecialchars($asig['titulo'], ENT_QUOTES); ?>"
+                                        data-ciclo="<?php echo htmlspecialchars($asig['ciclo_escolar'], ENT_QUOTES); ?>"
                                         data-fecha="<?php echo date('Y-m-d\TH:i', strtotime($asig['fecha_limite'])); ?>"
-                                        data-instrucciones="<?php echo htmlspecialchars($asig['instrucciones']); ?>"
-                                        data-terminos="<?php echo htmlspecialchars($asig['terminos']); ?>"
+                                        data-instrucciones="<?php echo htmlspecialchars($asig['instrucciones'], ENT_QUOTES); ?>"
+                                        data-terminos="<?php echo htmlspecialchars($asig['terminos'], ENT_QUOTES); ?>"
                                         onclick="llenarModalEditar(this)">
                                     ✏️ Editar
                                 </button>
-                                <a href="../auth/archivar_asignacion.php?id=<?php echo $asig['id_asignacion']; ?>" 
-                                class="btn btn-warning btn-sm" 
-                                onclick="return confirm('¿Deseas archivar este trámite? Dejará de ser visible para los alumnos.');">
-                                📁 Archivar
-                                </a>
-                                <a href="../auth/eliminar_asignacion.php?id=<?php echo $asig['id_asignacion']; ?>" 
-                                class="btn btn-outline-danger btn-sm" 
-                                onclick="return confirm('¡ADVERTENCIA! Esta acción borrará el trámite PERMANENTEMENTE de la base de datos. ¿Deseas continuar?');">
-                                ❌
-                                </a>
+                                <button type="button"
+                                    class="btn btn-warning btn-sm btn-archivar"
+                                    data-url="../auth/archivar_asignacion.php?id=<?php echo $asig['id_asignacion']; ?>"
+                                    data-titulo="<?php echo htmlspecialchars($asig['titulo'], ENT_QUOTES); ?>">
+                                    📁 Archivar
+                                </button>
+                                <button type="button"
+                                    class="btn btn-outline-danger btn-sm btn-eliminar"
+                                    data-url="../auth/eliminar_asignacion.php?id=<?php echo $asig['id_asignacion']; ?>"
+                                    data-titulo="<?php echo htmlspecialchars($asig['titulo'], ENT_QUOTES); ?>">
+                                    ❌
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -131,15 +99,18 @@ permitirAcceso(['admin']);
                                 <p class="text-muted small"><strong>Finalizó:</strong> <?php echo date('d/m/Y', strtotime($arch['fecha_limite'])); ?></p>
                                 
                                 <div class="d-flex justify-content-end gap-2 mt-3">
-                                    <a href="../auth/restaurar_asignacion.php?id=<?php echo $arch['id_asignacion']; ?>" 
-                                    class="btn btn-sm btn-outline-success" title="Reactivar">
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-success btn-restaurar"
+                                        data-url="../auth/restaurar_asignacion.php?id=<?php echo $arch['id_asignacion']; ?>"
+                                        data-titulo="<?php echo htmlspecialchars($arch['titulo'], ENT_QUOTES); ?>">
                                         🔄 Restaurar
-                                    </a>
-                                    <a href="../auth/eliminar_asignacion.php?id=<?php echo $arch['id_asignacion']; ?>" 
-                                    class="btn btn-sm btn-outline-danger" 
-                                    onclick="return confirm('¿Eliminar permanentemente de la base de datos?');">
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-danger btn-eliminar"
+                                        data-url="../auth/eliminar_asignacion.php?id=<?php echo $arch['id_asignacion']; ?>"
+                                        data-titulo="<?php echo htmlspecialchars($arch['titulo'], ENT_QUOTES); ?>">
                                         ❌
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -155,24 +126,58 @@ permitirAcceso(['admin']);
 
     <?php include 'modales/nueva_asignacion.php'; ?>
     <?php include 'modales/editar_asignacion.php'; ?>
+    <?php include 'modales/modal_confirmacion.php'; ?>
+    <?php include '../includes/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     function llenarModalEditar(boton) {
-    const id = boton.getAttribute('data-id');
-    const titulo = boton.getAttribute('data-titulo');
-    const ciclo = boton.getAttribute('data-ciclo');
-    const fecha = boton.getAttribute('data-fecha');
-    const instrucciones = boton.getAttribute('data-instrucciones');
-    const terminos = boton.getAttribute('data-terminos');
+        document.getElementById('edit_id').value = boton.getAttribute('data-id');
+        document.getElementById('edit_titulo').value = boton.getAttribute('data-titulo');
+        document.getElementById('edit_ciclo').value = boton.getAttribute('data-ciclo');
+        document.getElementById('edit_fecha').value = boton.getAttribute('data-fecha');
+        document.getElementById('edit_instrucciones').value = boton.getAttribute('data-instrucciones');
+        document.getElementById('edit_terminos').value = boton.getAttribute('data-terminos');
+    }
 
-    document.getElementById('edit_id').value = id;
-    document.getElementById('edit_titulo').value = titulo;
-    document.getElementById('edit_ciclo').value = ciclo;
-    document.getElementById('edit_fecha').value = fecha;
-    document.getElementById('edit_instrucciones').value = instrucciones;
-    document.getElementById('edit_terminos').value = terminos;
-}
-</script>
+    // Botones Archivar
+    document.querySelectorAll('.btn-archivar').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            const titulo = this.getAttribute('data-titulo');
+            confirmarAccion(
+                '¿Deseas archivar "' + titulo + '"? Dejará de ser visible para los alumnos.',
+                function() { window.location.href = url; },
+                'warning'
+            );
+        });
+    });
+
+    // Botones Eliminar
+    document.querySelectorAll('.btn-eliminar').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            const titulo = this.getAttribute('data-titulo');
+            confirmarAccion(
+                '⚠️ ¿Eliminar "' + titulo + '" permanentemente? Esta acción no se puede deshacer.',
+                function() { window.location.href = url; },
+                'danger'
+            );
+        });
+    });
+
+    // Botones Restaurar
+    document.querySelectorAll('.btn-restaurar').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            const titulo = this.getAttribute('data-titulo');
+            confirmarAccion(
+                '¿Deseas restaurar "' + titulo + '"? Volverá a ser visible para los alumnos.',
+                function() { window.location.href = url; },
+                'success'
+            );
+        });
+    });
+    </script>
 </body>
 </html>
