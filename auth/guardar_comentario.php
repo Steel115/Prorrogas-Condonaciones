@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $comentario = trim($_POST['comentario']);
 
     try {
-        $stmt = $pdo->prepare("UPDATE solicitudes SET comentarios = ?, ultima_modificacion = NOW() WHERE id_solicitud = ?");
+        $stmt = $pdo->prepare("UPDATE solicitudes SET comentarios = ?, comentario_leido = 0, ultima_modificacion = NOW() WHERE id_solicitud = ?");
         $stmt->execute([$comentario, $id_solicitud]);
 
         // ✅ Respuesta JSON para el AJAX

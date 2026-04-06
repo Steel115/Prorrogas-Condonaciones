@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Iniciar sesión</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 
 <body class="bg-light">
@@ -39,12 +40,23 @@
                                 <input type="password" name="password" class="form-control" required>
                             </div>
                             
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" name="terminos" id="terminos" required>
-                                <label class="form-check-label" for="terminos">
-                                    Acepto los <a href="../assets/pdf/terminos.pdf" target="_blank">términos de uso</a>
-                                </label>
+                            <div class="mb-3 p-3 border rounded shadow-sm bg-light">
+                                <div class="d-flex align-items-center">
+                                    <input type="checkbox" class="btn-check" name="terminos" id="terminos" autocomplete="off" required>
+                                
+                                    <label class="btn btn-sm btn-outline-success fw-bold w-auto me-2" for="terminos">
+                                        <i class="bi bi-check-lg">Acepto</i> 
+                                    </label>
+
+                                    <span class="small text-muted">
+                                        los términos de uso
+                                        <a href="../assets/pdf/terminos.pdf" target="_blank" class="text-decoration-none fw-bold">
+                                            términos de uso
+                                        </a>
+                                    </span>
+                                </div>
                             </div>
+                            
                             <button type="submit" class="btn btn-primary w-100">Entrar al Sistema</button>
                             <div class="mt-3 text-center">
                                 <a href="registro.php" style="font-size: 1.2rem;">¿Aun no tienes cuenta? Registrate aqui</a>

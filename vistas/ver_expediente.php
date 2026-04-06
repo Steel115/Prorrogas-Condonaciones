@@ -40,11 +40,12 @@ $solicitudes = $stmtSol->fetchAll();
 <head>
     <meta charset="UTF-8">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/layout.css">
     <title>Expediente - <?php echo $num_control; ?></title>
 </head>
 <body>
 
-<div class="container">
+<main class="container">
     <div class="d-block mb-2 mt-3">
         <a href="admin_historial.php" class="btn btn-sm btn-outline-secondary mb-3">
             ← Volver
@@ -113,7 +114,7 @@ $solicitudes = $stmtSol->fetchAll();
         <?php endif; ?>
 
     </div>
-</div>
+</main>
 <?php include '../includes/footer.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

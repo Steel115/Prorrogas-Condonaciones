@@ -29,9 +29,10 @@ $alumnos = $stmt->fetchAll();
     <title>Historial de Alumnos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 <body class="bg-light">
-    <div class="container mt-4">
+    <main class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3>Control de Expedientes</h3>
         </div>
@@ -95,7 +96,7 @@ $alumnos = $stmt->fetchAll();
                 </table>
             </div>
         </div>
-    </div>
+    </main>
     <?php include '../includes/footer.php'; ?>
 </body>
 </html>

@@ -33,7 +33,7 @@ if (isset($_GET['id'])) {
             exit;
         }
     }
-    $stmtStatus = $pdo->prepare("SELECT id_solicitud, estatus, comentarios FROM solicitudes WHERE id_asignacion = ? AND num_control_alumno = ?");
+    $stmtStatus = $pdo->prepare("SELECT id_solicitud, estatus, comentarios, comentario_leido FROM solicitudes WHERE id_asignacion = ? AND num_control_alumno = ?");
     $stmtStatus->execute([$id_asignacion, $num_control]);
     $t_status = $stmtStatus->fetch();
     $solicitud_id = ($t_status) ? $t_status['id_solicitud'] : null;
@@ -48,6 +48,7 @@ if (isset($_GET['id'])) {
     <meta charset="UTF-8">
     <title>Trámites</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 <body class="bg-light">
 
@@ -132,7 +133,7 @@ if (isset($_GET['id'])) {
         <div class="alert alert-light border p-4 shadow-sm">
             <h4 class="text-center mb-4">🕐 Estado del Trámite</h4>
 
-            <?php if (!empty($t_status['comentarios'])): ?>
+            <?php if (!empty($t_status['comentarios']) && !$t_status['comentario_leido']): ?>
                 <div class="alert alert-danger border-start border-4 mb-4">
                     <h6 class="fw-bold">⚠️ Observación para corregir:</h6>
                     <p class="mb-0"><?php echo htmlspecialchars($t_status['comentarios']); ?></p>
@@ -242,7 +243,7 @@ if (isset($_GET['id'])) {
 
     <?php elseif ($t_status['estatus'] == 'Validando pago'): ?>
     <!-- Validando pago -->
-        <?php if (!empty($t_status['comentarios'])): ?>
+        <?php if (!empty($t_status['comentarios']) && !$t_status['comentario_leido']): ?>
             <!-- Con comentario: mostrar comprobantes actuales + opción de quitar/subir nuevos -->
             <div class="card p-4 shadow-sm border-warning">
                 <h5 class="text-warning fw-bold">💳 Comprobante en Revisión</h5>

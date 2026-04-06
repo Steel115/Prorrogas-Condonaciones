@@ -12,9 +12,10 @@ include '../includes/header.php';
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 <body class="bg-light">
-    <div class="container mt-4">
+    <main class="container mt-4">
         
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>Asignaciones Activas</h4>
@@ -122,7 +123,7 @@ include '../includes/header.php';
                 </div>
             <?php endif; ?>
         </div>
-    </div>
+    </main>
 
     <?php include 'modales/nueva_asignacion.php'; ?>
     <?php include 'modales/editar_asignacion.php'; ?>

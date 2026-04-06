@@ -27,10 +27,11 @@ $solicitudes = $stmt->fetchAll();
     <meta charset="UTF-8">
     <title>Solicitudes Recibidas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 
 <body class="bg-light">
-    <div class="container mt-4">
+    <main class="container mt-4">
         <h3 class="mb-4">Solicitudes Recibidas</h3>
         <div class="card shadow">
             <div class="card-body">
@@ -87,7 +88,7 @@ $solicitudes = $stmt->fetchAll();
                 </table>
             </div>
         </div>
-    </div>
+    </main>
     <?php include '../includes/footer.php'; ?>
 
     <?php include 'modales/modal_confirmacion.php'; ?>

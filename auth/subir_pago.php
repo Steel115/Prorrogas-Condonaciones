@@ -15,13 +15,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pagos'])) {
             mkdir($directorio_destino, 0777, true);
         }
 
-        // ✅ Borrar comprobantes anteriores
-        $stmtViejos = $pdo->prepare("SELECT ruta_fisica FROM expediente_archivos WHERE id_solicitud = ? AND tipo_archivo = 'pago'");
-        $stmtViejos->execute([$id_solicitud]);
-        foreach ($stmtViejos->fetchAll() as $viejo) {
-            if (file_exists($viejo['ruta_fisica'])) unlink($viejo['ruta_fisica']);
+        // ✅ Borrar comprobantes anteriores solo cuando es la primera subida
+        // Si ya está en 'Validando pago' es una re-subida por observación — se acumulan
+        $stmtEstatus = $pdo->prepare("SELECT estatus FROM solicitudes WHERE id_solicitud = ?");
+        $stmtEstatus->execute([$id_solicitud]);
+        $estatusActual = $stmtEstatus->fetchColumn();
+
+        if ($estatusActual === 'Pago pendiente') {
+            $stmtViejos = $pdo->prepare("SELECT ruta_fisica FROM expediente_archivos WHERE id_solicitud = ? AND tipo_archivo = 'pago'");
+            $stmtViejos->execute([$id_solicitud]);
+            foreach ($stmtViejos->fetchAll() as $viejo) {
+                if (file_exists($viejo['ruta_fisica'])) unlink($viejo['ruta_fisica']);
+            }
+            $pdo->prepare("DELETE FROM expediente_archivos WHERE id_solicitud = ? AND tipo_archivo = 'pago'")->execute([$id_solicitud]);
         }
-        $pdo->prepare("DELETE FROM expediente_archivos WHERE id_solicitud = ? AND tipo_archivo = 'pago'")->execute([$id_solicitud]);
 
         foreach ($_FILES['pagos']['tmp_name'] as $key => $tmp_name) {
             if ($_FILES['pagos']['error'][$key] !== UPLOAD_ERR_OK) {
@@ -48,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pagos'])) {
             }
         }
 
-        // ✅ Actualizar estatus y limpiar comentario
-        $pdo->prepare("UPDATE solicitudes SET estatus = 'Validando pago', comentarios = NULL WHERE id_solicitud = ?")->execute([$id_solicitud]);
+        // ✅ Actualizar estatus y marcar comentario como leído
+        $pdo->prepare("UPDATE solicitudes SET estatus = 'Validando pago', comentario_leido = 1 WHERE id_solicitud = ?")->execute([$id_solicitud]);
 
         $stmtAsig = $pdo->prepare("SELECT id_asignacion FROM solicitudes WHERE id_solicitud = ?");
         $stmtAsig->execute([$id_solicitud]);

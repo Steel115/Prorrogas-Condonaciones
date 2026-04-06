@@ -14,9 +14,10 @@ $usuarios = $stmt->fetchAll();
     <meta charset="UTF-8">
     <title>Gestión de Personal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 <body class="bg-light">
-    <div class="container mt-4">
+    <main class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3>Usuarios</h3>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
@@ -70,7 +71,7 @@ $usuarios = $stmt->fetchAll();
                 </tbody>
             </table>
         </div>
-    </div>
+    </main>
 
     <?php include 'modales/nuevo_usuario.php'; ?>
     <?php include 'modales/editar_usuario.php'; ?>

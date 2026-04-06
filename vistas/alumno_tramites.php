@@ -15,6 +15,7 @@ if ($_SESSION['rol'] !== 'alumno') {
     <meta charset="UTF-8">
     <title>Trámites</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 <body class="bg-light">
     <main class="container mt-5">

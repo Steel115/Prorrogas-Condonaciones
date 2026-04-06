@@ -27,6 +27,7 @@ $archivos = $stmtFiles->fetchAll();
     <meta charset="UTF-8">
     <title>Revisando Solicitud #<?php echo $id_solicitud; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 <body class="bg-light">
     <div class="container mt-4">
@@ -72,12 +73,12 @@ $archivos = $stmtFiles->fetchAll();
                 <?php if ($solicitud['estatus'] == 'Finalizada'): ?>
                     <p class="text-muted">Este trámite ha sido completado.</p>
                     <?php if ($totalPagos === 1): ?>
-                        <!-- Un solo comprobante — botón directo -->
+                        <!-- Cuando es solo un archivo -->
                         <a href="<?php echo $pagos[0]['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-secondary mb-3">
                             🔍 Ver Comprobante de Pago
                         </a>
                     <?php else: ?>
-                        <!-- Varios comprobantes — lista -->
+                        <!-- cuando son varios archivos -->
                         <div class="list-group mb-3 text-start">
                             <?php foreach ($pagos as $pago): ?>
                                 <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank"
@@ -93,12 +94,12 @@ $archivos = $stmtFiles->fetchAll();
                 <?php else: ?>
                     <p>El alumno ha subido su<?php echo $totalPagos > 1 ? 's vouchers:' : ' voucher:'; ?></p>
                     <?php if ($totalPagos === 1): ?>
-                        <!-- Un solo comprobante — botón directo -->
+                        <!-- Cuando es un solo archivo -->
                         <a href="<?php echo $pagos[0]['ruta_fisica']; ?>" target="_blank" class="btn btn-outline-success mb-3">
                             🔍 Abrir Comprobante de Pago
                         </a>
                     <?php else: ?>
-                        <!-- Varios comprobantes — lista -->
+                        <!-- Cuando son varios archivos -->
                         <div class="list-group mb-3 text-start">
                             <?php foreach ($pagos as $pago): ?>
                                 <a href="<?php echo $pago['ruta_fisica']; ?>" target="_blank"
@@ -112,11 +113,6 @@ $archivos = $stmtFiles->fetchAll();
                     <hr>
                     <form action="../auth/finalizar_tramite.php" method="POST" id="formFinalizar">
                         <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
-                        <div class="mb-3 text-start">
-                            <label class="form-label small text-muted">Mensaje final para el alumno (opcional)</label>
-                            <textarea name="comentario_dictamen" class="form-control form-control-sm" rows="2"
-                                placeholder="Ej: Tu trámite ha sido completado exitosamente..."></textarea>
-                        </div>
                         <button type="button" id="btnFinalizar" class="btn btn-success btn-lg w-100">
                             ✅ Validar y Finalizar Trámite
                         </button>
@@ -133,13 +129,19 @@ $archivos = $stmtFiles->fetchAll();
                     <div class="card-body">
                         <h5 class="card-title text-info">💬 Observaciones</h5>
                         <p class="small text-muted">Escribe un mensaje para el alumno si hay alguna observación.</p>
+
+                        <?php if (!empty($solicitud['comentarios'])): ?>
+                        <div class="mb-3 p-2 rounded" style="background-color:#f0f9ff; border-left: 3px solid #0dcaf0;">
+                            <p class="text-muted mb-1" style="font-size:0.75rem;">💬 Último mensaje enviado:</p>
+                            <p class="mb-0 small"><?php echo htmlspecialchars($solicitud['comentarios']); ?></p>
+                        </div>
+                        <?php endif; ?>
+
                         <form action="../auth/guardar_comentario.php" method="POST" id="formComentario">
                             <input type="hidden" name="id_solicitud" value="<?php echo $id_solicitud; ?>">
                             <div class="mb-3">
                                 <textarea name="comentario" id="textoComentario" class="form-control" rows="4" 
-                                placeholder="<?php echo !empty($solicitud['comentarios']) 
-                                    ? 'Último mensaje: ' . htmlspecialchars($solicitud['comentarios'], ENT_QUOTES) 
-                                    : 'Ej: El archivo no es legible...'; ?>"></textarea>
+                                placeholder="Ej: El archivo no es legible..."></textarea>
                             </div>
                             <div class="d-grid">
                                 <button type="submit" id="btnEnviarComentario" class="btn btn-info text-white">

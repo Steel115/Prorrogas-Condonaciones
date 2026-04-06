@@ -58,6 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['documentos'])) {
 
         $pdo->commit();
         header("Location: ../vistas/detalle_tramite.php?id=$id_asignacion&msg=Solicitud enviada con éxito");
+        
+        // ✅ Marcar comentario como leído al subir nuevos archivos
+        if (!empty($_POST['id_solicitud_existente'])) {
+            $pdo->prepare("UPDATE solicitudes SET comentario_leido = 1 WHERE id_solicitud = ?")->execute([$id_solicitud]);
+        }
 
     } catch (Exception $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
