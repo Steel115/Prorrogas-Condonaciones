@@ -5,16 +5,11 @@ $rol = $_SESSION['rol'] ?? null;
 <!-- Barra principal -->
 <header class="hdr">
     <div class="hdr-inner">
-
-        <!-- Izquierda: nombre del sistema -->
         <span class="hdr-titulo">Sistema de Prórrogas y Condonaciones</span>
-
-        <!-- Centro: logo institucional -->
-        <div class="hdr-logo">
-            <!-- ✅ Descomenta cuando tengas el logo -->
-            <!-- <img src="../assets/img/logo.png" alt="Logo institucional" style="height:48px;"> -->
+        <div class="hdr-logo my-2">
+            <!--<img src="../assets/img/tecnm.ico" alt="Logo" class="img-thumbnail" style="height: 60px;">-->
+            <img src="../assets/img/tecnm.ico" alt="Logo" style="height: 60px; filter: brightness(0) invert(1);">
         </div>
-
         <!-- Derecha: info usuario + cerrar sesión -->
         <?php if ($rol): ?>
         <div class="hdr-usuario">
