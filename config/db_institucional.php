@@ -1,19 +1,8 @@
 <?php
-// ══════════════════════════════════════════
-// Conexión a la BD Institucional (solo lectura)
-// ✅ Campos conocidos:
-//    aluctr  — número de control
-//    aluapp  — apellido paterno
-//    aluapm  — apellido materno
-//    alunom  — nombre
-//    alumai  — correo institucional
-//    carrera — nombre del campo pendiente confirmar
-// ══════════════════════════════════════════
-
 $host_inst = 'localhost';
-$db_inst   = 'PENDIENTE';  // ← reemplaza con el nombre real de la BD institucional
-$user_inst = 'PENDIENTE';  // ← reemplaza con el usuario
-$pass_inst = 'PENDIENTE';  // ← reemplaza con la contraseña
+$db_inst   = 'bd_institucional';
+$user_inst = 'root';
+$pass_inst = '';
 $charset   = 'utf8mb4';
 
 $dsn_inst = "mysql:host=$host_inst;dbname=$db_inst;charset=$charset";

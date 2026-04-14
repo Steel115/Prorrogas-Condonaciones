@@ -1,11 +1,11 @@
 <?php
 require_once '../config/db.php';
+require_once '../config/db_institucional.php'; // ✅ Conexión BD institucional
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $num_control = $_POST['num_control'];
-    $nombre = $_POST['nombre_completo'];
-    $pass = $_POST['password'];
-    $confirm_pass = $_POST['confirm_password']; // Recibimos el nuevo campo de confirmación
+    $num_control  = trim($_POST['num_control']);
+    $pass         = $_POST['password'];
+    $confirm_pass = $_POST['confirm_password'];
 
     // --- 1. VALIDACIONES DE SEGURIDAD (SERVIDOR) ---
 
@@ -23,16 +23,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // --- 2. VALIDACIONES DE BASE DE DATOS ---
 
-    // Revisa si el alumno está en la base de datos del Tec (bd_estudiantes)
-    $checkEstudiante = $pdo->prepare("SELECT num_control FROM bd_estudiantes WHERE num_control = ?");
-    $checkEstudiante->execute([$num_control]);
+    // ✅ Verificar que la conexión institucional esté disponible
+    if (!$pdo_inst) {
+        header("Location: ../vistas/registro.php?error=" . urlencode("La conexión institucional no está disponible. Contacta al administrador."));
+        exit;
+    }
 
-    if ($checkEstudiante->rowCount() === 0) {
+    // ✅ Buscar al alumno en la BD institucional y obtener sus datos
+    $checkInst = $pdo_inst->prepare("SELECT aluctr, aluapp, aluapm, alunom, alumai 
+                                     FROM alumnos_inst 
+                                     WHERE aluctr = ?");
+    $checkInst->execute([$num_control]);
+    $alumnoInst = $checkInst->fetch();
+
+    if (!$alumnoInst) {
         header("Location: ../vistas/registro.php?error=" . urlencode("El número de control no existe en el sistema escolar."));
         exit;
     }
 
-    // Revisa si ya existe una cuenta creada para ese número (alumnos)
+    // Verificar que no se haya registrado antes
     $checkRegistro = $pdo->prepare("SELECT num_control FROM alumnos WHERE num_control = ?");
     $checkRegistro->execute([$num_control]);
 
@@ -43,19 +52,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // --- 3. PROCESO DE REGISTRO ---
 
-    // Encriptar contraseña (solo después de validar que todo está correcto)
+    // ✅ Construir nombre completo desde la BD institucional (nombre + apellidos)
+    $nombre_completo = trim(
+        $alumnoInst['alunom'] . ' ' .
+        $alumnoInst['aluapp'] . ' ' .
+        $alumnoInst['aluapm']
+    );
+
     $passwordHash = password_hash($pass, PASSWORD_BCRYPT);
 
     try {
         $stmt = $pdo->prepare("INSERT INTO alumnos (num_control, nombre_completo, password) VALUES (?, ?, ?)");
-        $stmt->execute([$num_control, $nombre, $passwordHash]);
+        $stmt->execute([$num_control, $nombre_completo, $passwordHash]);
 
-        // ✅ Redirigir al login con mensaje de éxito
         header("Location: ../vistas/login.php?msg=" . urlencode("¡Registro exitoso! Ya puedes iniciar sesión."));
         exit;
 
     } catch (PDOException $e) {
-        // Log del error para el desarrollador, pero mensaje genérico para el usuario
         header("Location: ../vistas/registro.php?error=" . urlencode("Error técnico al registrar. Intenta de nuevo."));
         exit;
     }

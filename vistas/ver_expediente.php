@@ -1,26 +1,28 @@
 <?php 
 require_once '../config/db.php'; 
+require_once '../config/db_institucional.php';
 require_once '../includes/auth_check.php';
 permitirAcceso(['admin', 'contribuyente']);
 include '../includes/header.php';
 
 $num_control = $_GET['num_control'];
 
-$stmtAlu = $pdo->prepare("SELECT 
-                            a.nombre_completo, 
-                            a.num_control, 
-                            a.es_deudor, 
-                            e.carrera, 
-                            e.semestre 
-                          FROM alumnos a
-                          INNER JOIN bd_estudiantes e ON a.num_control = e.num_control
-                          WHERE a.num_control = ?");
+// ✅ Obtener datos del alumno desde el sistema
+$stmtAlu = $pdo->prepare("SELECT nombre_completo, num_control, es_deudor FROM alumnos WHERE num_control = ?");
 $stmtAlu->execute([$num_control]);
 $alumno = $stmtAlu->fetch();
 
-// Si no se encuentra el alumno (por seguridad)
 if (!$alumno) {
-    die("Error: El alumno no se encuentra en los registros académicos.");
+    die("Error: El alumno no se encuentra en los registros del sistema.");
+}
+
+// ✅ Obtener carrera desde la BD institucional
+$alumno['carrera'] = 'N/A';
+if ($pdo_inst) {
+    $stmtInst = $pdo_inst->prepare("SELECT carrera FROM alumnos_inst WHERE aluctr = ?");
+    $stmtInst->execute([$num_control]);
+    $instData = $stmtInst->fetch();
+    if ($instData) $alumno['carrera'] = $instData['carrera'] ?? 'N/A';
 }
 
 // El resto de la consulta de solicitudes se queda igual

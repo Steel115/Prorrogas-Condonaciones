@@ -1,25 +1,33 @@
 <?php 
 require_once '../config/db.php'; 
+require_once '../config/db_institucional.php';
 require_once '../includes/auth_check.php';
 permitirAcceso(['admin', 'contribuyente']);
 include '../includes/header.php';
 
 $busqueda = isset($_GET['buscar']) ? $_GET['buscar'] : '';
-$sql = "SELECT 
-            a.num_control, 
-            a.nombre_completo, 
-            a.es_deudor,
-            e.carrera, 
-            e.semestre,
-            e.estatus_escolar
+
+// ✅ Solo consulta la tabla alumnos del sistema
+$sql = "SELECT a.num_control, a.nombre_completo, a.es_deudor
         FROM alumnos a
-        INNER JOIN bd_estudiantes e ON a.num_control = e.num_control
         WHERE a.num_control LIKE ? OR a.nombre_completo LIKE ? 
         ORDER BY a.nombre_completo ASC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute(["%$busqueda%", "%$busqueda%"]);
 $alumnos = $stmt->fetchAll();
+
+// ✅ Para cada alumno, obtener carrera de la BD institucional
+foreach ($alumnos as &$alu) {
+    $alu['carrera'] = 'N/A';
+    if ($pdo_inst) {
+        $stmtInst = $pdo_inst->prepare("SELECT carrera FROM alumnos_inst WHERE aluctr = ?");
+        $stmtInst->execute([$alu['num_control']]);
+        $instData = $stmtInst->fetch();
+        if ($instData) $alu['carrera'] = $instData['carrera'] ?? 'N/A';
+    }
+}
+unset($alu);
 ?>
 
 <!DOCTYPE html>
@@ -61,7 +69,7 @@ $alumnos = $stmt->fetchAll();
                             <th>No. Control</th>
                             <th>Nombre Completo</th>
                             <th>Carrera</th>
-                            <th>Estatus Académico</th>
+                            <th>Estatus</th>
                             <th class="text-center">Acción</th>
                         </tr>
                     </thead>
