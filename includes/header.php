@@ -8,7 +8,7 @@ $rol = $_SESSION['rol'] ?? null;
         <span class="hdr-titulo">Sistema de Prórrogas y Condonaciones</span>
         <div class="hdr-logo my-2">
             <!--<img src="../assets/img/tecnm.ico" alt="Logo" class="img-thumbnail" style="height: 60px;">-->
-            <img src="../assets/img/tecnm.ico" alt="Logo" style="height: 60px; filter: brightness(0) invert(1);">
+            <img src="../assets/img/tecnm.png" alt="Logo" style="height: 60px; filter: brightness(0) invert(1);">
         </div>
         <!-- Derecha: info usuario + cerrar sesión -->
         <?php if ($rol): ?>
