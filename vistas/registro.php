@@ -34,11 +34,13 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Crea tu Contraseña</label>
-                                <div id="pwHelp" class="form-text">
-                                    <label>Debe tener al menos 8 caracteres</label>
+                                <div id="pwHelp" class="form-text mt-2">
+                                    <p>💡 Usa al menos 8 caracteres, números y un símbolo como <strong>@, $, ! o %.</strong></p>
                                 </div>
                                 <input type="password" name="password" id="password" class="form-control" 
-                                    required minlength="8">
+                                    required 
+                                    pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                                    title="Mínimo 8 caracteres, incluye letras, números y un carácter especial">
                             </div>
 
                             <div class="mb-3">
@@ -69,45 +71,61 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const password = document.getElementById('password');
-        const confirm  = document.getElementById('confirm_password');
-        const message  = document.getElementById('matchMessage');
-        const btn      = document.getElementById('btnRegistrar');
+    const password = document.getElementById('password');
+    const confirm  = document.getElementById('confirm_password');
+    const message  = document.getElementById('matchMessage');
+    const pwHelp   = document.getElementById('pwHelp');
+    const btn      = document.getElementById('btnRegistrar');
 
-        function validar() {
-            const val1 = password.value;
-            const val2 = confirm.value;
+    // Expresión regular para: Letras, Números y Caracteres Especiales
+    const regexSeguridad = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])/;
 
-            if (val1 === "" || val2 === "") {
-                message.textContent = "";
-                btn.disabled = true;
-                return;
-            }
+    function validar() {
+        const val1 = password.value;
+        const val2 = confirm.value;
 
-            if (val1 === val2 && val1.length >= 8) {
-                message.textContent = "✅ Las contraseñas coinciden";
-                message.className = "form-text fw-bold text-success";
-                password.classList.add('is-valid');
-                confirm.classList.add('is-valid');
-                password.classList.remove('is-invalid');
-                confirm.classList.remove('is-invalid');
-                btn.disabled = false;
+        // Validación de complejidad visual (Sugerencia)
+        if (val1.length > 0) {
+            if (!regexSeguridad.test(val1)) {
+                pwHelp.style.color = '#856404';
+                pwHelp.innerHTML = '⚠️ Debe incluir letras, números y almenos un carácter especial (@, $, !, %).';
             } else {
-                message.textContent = val1 !== val2
-                    ? "❌ Las contraseñas no coinciden"
-                    : "⚠️ La contraseña debe tener al menos 8 caracteres";
-                message.className = "form-text fw-bold text-danger";
-                password.classList.add('is-invalid');
-                confirm.classList.add('is-invalid');
-                password.classList.remove('is-valid');
-                confirm.classList.remove('is-valid');
-                btn.disabled = true;
+                pwHelp.style.color = '#155724';
+                pwHelp.innerHTML = '✅ ¡Contraseña segura!';
             }
         }
 
-        password.addEventListener('input', validar);
-        confirm.addEventListener('input', validar);
-    });
-    </script>
+        // Validación de coincidencia y longitud
+        if (val1 === "" || val2 === "") {
+            message.textContent = "";
+            btn.disabled = true;
+            return;
+        }
+
+        if (val1 === val2 && val1.length >= 8 && regexSeguridad.test(val1)) {
+            message.textContent = "✅ Las contraseñas coinciden y son seguras";
+            message.className = "form-text fw-bold text-success";
+            password.classList.replace('is-invalid', 'is-valid');
+            confirm.classList.replace('is-invalid', 'is-valid');
+            btn.disabled = false;
+        } else {
+            if (val1 !== val2) {
+                message.textContent = "❌ Las contraseñas no coinciden";
+            } else if (val1.length < 8) {
+                message.textContent = "⚠️ Mínimo 8 caracteres";
+            } else {
+                message.textContent = "⚠️ Debe incluir letras, números y símbolos";
+            }
+            message.className = "form-text fw-bold text-danger";
+            password.classList.add('is-invalid');
+            confirm.classList.add('is-invalid');
+            btn.disabled = true;
+        }
+    }
+
+    password.addEventListener('input', validar);
+    confirm.addEventListener('input', validar);
+});
+</script>
 </body>
 </html>

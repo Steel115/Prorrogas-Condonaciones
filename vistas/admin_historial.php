@@ -7,7 +7,7 @@ include '../includes/header.php';
 
 $busqueda = isset($_GET['buscar']) ? $_GET['buscar'] : '';
 
-// ✅ Solo consulta la tabla alumnos del sistema
+// Consulta la tabla de alumnos del sistema de prorrogas
 $sql = "SELECT a.num_control, a.nombre_completo, a.es_deudor
         FROM alumnos a
         WHERE a.num_control LIKE ? OR a.nombre_completo LIKE ? 

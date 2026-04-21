@@ -89,8 +89,9 @@ $archivos = $stmtFiles->fetchAll();
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
-                    <span class="badge bg-secondary fs-6 px-4 py-2">✔️ Proceso concluido</span>
-
+                        <div>
+                            <span class="badge bg-secondary fs-6 px-4 py-2">✔️ Proceso concluido</span>
+                        </div>
                 <?php else: ?>
                     <p>El alumno ha subido su<?php echo $totalPagos > 1 ? 's vouchers:' : ' voucher:'; ?></p>
                     <?php if ($totalPagos === 1): ?>

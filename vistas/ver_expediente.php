@@ -7,7 +7,7 @@ include '../includes/header.php';
 
 $num_control = $_GET['num_control'];
 
-// ✅ Obtener datos del alumno desde el sistema
+// Consulta a la tabla alumnos del sistema de prorrogas
 $stmtAlu = $pdo->prepare("SELECT nombre_completo, num_control, es_deudor FROM alumnos WHERE num_control = ?");
 $stmtAlu->execute([$num_control]);
 $alumno = $stmtAlu->fetch();
@@ -16,16 +16,19 @@ if (!$alumno) {
     die("Error: El alumno no se encuentra en los registros del sistema.");
 }
 
-// ✅ Obtener carrera desde la BD institucional
+// Obtener carrera y correo desde la BD institucional
 $alumno['carrera'] = 'N/A';
+$alumno['correo']  = 'N/A';
 if ($pdo_inst) {
-    $stmtInst = $pdo_inst->prepare("SELECT carrera FROM alumnos_inst WHERE aluctr = ?");
+    $stmtInst = $pdo_inst->prepare("SELECT carrera, alumai FROM alumnos_inst WHERE aluctr = ?");
     $stmtInst->execute([$num_control]);
     $instData = $stmtInst->fetch();
-    if ($instData) $alumno['carrera'] = $instData['carrera'] ?? 'N/A';
+    if ($instData) {
+        $alumno['carrera'] = $instData['carrera'] ?? 'N/A';
+        $alumno['correo']  = $instData['alumai']  ?? 'N/A';
+    }
 }
 
-// El resto de la consulta de solicitudes se queda igual
 $sql = "SELECT s.*, a.titulo, a.ciclo_escolar, u.nombre_completo as revisor 
         FROM solicitudes s
         JOIN asignaciones a ON s.id_asignacion = a.id_asignacion
@@ -63,7 +66,8 @@ $solicitudes = $stmtSol->fetchAll();
                 </div>
                 <div class="col-md-11">
                     <h4 class="mb-1 text-uppercase"><?php echo htmlspecialchars($alumno['nombre_completo']); ?></h4>
-                    <p class="text-muted mb-0">No. Control: <strong><?php echo $alumno['num_control']; ?></strong> | Carrera: <?php echo $alumno['carrera']; ?></p>
+                    <p class="text-muted mb-0">No. Control: <strong><?php echo $alumno['num_control']; ?></strong> | Carrera: <?php echo htmlspecialchars($alumno['carrera']); ?></p>
+                    <p class="text-muted mb-1 small">✉️ <?php echo htmlspecialchars($alumno['correo']); ?></p>
                     <span class="badge <?php echo $alumno['es_deudor'] ? 'bg-danger' : 'bg-success'; ?>">
                         <?php echo $alumno['es_deudor'] ? 'Estatus: DEUDOR' : 'Alumno Regular'; ?>
                     </span>

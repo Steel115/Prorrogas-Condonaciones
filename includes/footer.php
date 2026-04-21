@@ -39,27 +39,28 @@
                     </div>
                 </a>
 
-                <a href="#" class="ftr-recurso-item">
-                    <span class="ftr-recurso-icono">📖</span>
+                <a href="../assets/pdf/Reinscripcion.pdf" target="_blank" class="ftr-recurso-item">
+                    <span class="ftr-recurso-icono">📄</span>
                     <div>
-                        <span class="ftr-recurso-nombre">Manual de Usuario</span>
-                        <span class="ftr-recurso-desc">Guía del sistema</span>
+                        <span class="ftr-recurso-nombre">Prorroga de reinscripción</span>
+                        <span class="ftr-recurso-desc">Archivo reinscripción</span>
                     </div>
                 </a>
 
-                <!-- ✅ Agrega más recursos aquí siguiendo el mismo patrón -->
+                <!-- Aqui agregar mas recursos -->
 
             </div>
         </div>
 
+        <!-- footer para el admin y contribuyente -->
         <?php elseif ($rol === 'admin' || $rol === 'contribuyente'): ?>
         <button class="ftr-acordeon-btn" onclick="toggleFooter(this)">
             🛠️ Recursos administrativos
             <span class="ftr-chevron">▼</span>
         </button>
         <div class="ftr-acordeon-body">
-            <p class="ftr-proximamente">Próximamente se agregarán recursos útiles para el área administrativa.</p>
-            <!-- ✅ Agrega recursos aquí cuando los tengas -->
+            <p class="ftr-proximamente">Próximamente</p>
+            <!-- agregar más informacion-->
         </div>
 
         <?php endif; ?>
@@ -69,7 +70,7 @@
     <!-- Barra inferior -->
     <div class="ftr-barra-inferior">
         <span class="ftr-copy">Sistema de Prórrogas y Condonaciones</span>
-        <span class="ftr-version">v1.0</span>
+        <span class="ftr-version"></span>
     </div>
 </footer>
 
