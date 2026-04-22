@@ -8,7 +8,7 @@ include '../includes/header.php';
 $busqueda = isset($_GET['buscar']) ? $_GET['buscar'] : '';
 
 // Consulta la tabla de alumnos del sistema de prorrogas
-$sql = "SELECT a.num_control, a.nombre_completo, a.es_deudor
+$sql = "SELECT a.num_control, a.nombre_completo, a.es_deudor, a.carrera
         FROM alumnos a
         WHERE a.num_control LIKE ? OR a.nombre_completo LIKE ? 
         ORDER BY a.nombre_completo ASC";
@@ -16,18 +16,6 @@ $sql = "SELECT a.num_control, a.nombre_completo, a.es_deudor
 $stmt = $pdo->prepare($sql);
 $stmt->execute(["%$busqueda%", "%$busqueda%"]);
 $alumnos = $stmt->fetchAll();
-
-// ✅ Para cada alumno, obtener carrera de la BD institucional
-foreach ($alumnos as &$alu) {
-    $alu['carrera'] = 'N/A';
-    if ($pdo_inst) {
-        $stmtInst = $pdo_inst->prepare("SELECT carrera FROM alumnos_inst WHERE aluctr = ?");
-        $stmtInst->execute([$alu['num_control']]);
-        $instData = $stmtInst->fetch();
-        if ($instData) $alu['carrera'] = $instData['carrera'] ?? 'N/A';
-    }
-}
-unset($alu);
 ?>
 
 <!DOCTYPE html>

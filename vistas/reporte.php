@@ -13,7 +13,7 @@ $solicitudesGeneral = [];
 
 foreach ($asignaciones as &$asig) {
     $stmtSol = $pdo->prepare("
-        SELECT s.id_solicitud, s.id_asignacion, al.num_control, al.nombre_completo, al.es_deudor,
+        SELECT s.id_solicitud, s.id_asignacion, al.num_control, al.nombre_completo, al.es_deudor, al.carrera,
                s.estatus, a.titulo as nombre_asignacion
         FROM solicitudes s
         JOIN alumnos al ON s.num_control_alumno = al.num_control
@@ -30,17 +30,9 @@ foreach ($asignaciones as &$asig) {
     $stmtSol->execute([$asig['id_asignacion']]);
     $asig['solicitudes'] = $stmtSol->fetchAll();
 
-    foreach ($asig['solicitudes'] as &$sol) {
-        $sol['carrera'] = 'N/A';
-        if ($pdo_inst) {
-            $stmtInst = $pdo_inst->prepare("SELECT carrera FROM alumnos_inst WHERE aluctr = ?");
-            $stmtInst->execute([$sol['num_control']]);
-            $instData = $stmtInst->fetch();
-            if ($instData) $sol['carrera'] = $instData['carrera'] ?? 'N/A';
-        }
+    foreach ($asig['solicitudes'] as $sol) {
         $solicitudesGeneral[] = $sol;
     }
-    unset($sol);
 }
 unset($asig);
 ?>

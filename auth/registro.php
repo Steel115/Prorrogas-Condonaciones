@@ -34,10 +34,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Buscar al alumno con los nombres de columna oficiales (aluctr, alunom, etc.)
-    $checkInst = $pdo_inst->prepare("SELECT aluctr, aluapp, aluapm, alunom FROM alumnos_inst WHERE aluctr = ?");
+    // Buscar al alumno con los datos institucionales
+    $checkInst = $pdo_inst->prepare("SELECT aluctr, aluapp, aluapm, alunom, alumai, carrera FROM alumnos_inst WHERE aluctr = ?");
     $checkInst->execute([$num_control]);
     $alumnoInst = $checkInst->fetch();
+    $correo = $alumnoInst['alumai'] ?? null;
 
     if (!$alumnoInst) {
         header("Location: ../vistas/registro.php?error=" . urlencode("El número de control no pertenece al padrón del ITGAM."));
@@ -56,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- 3. PROCESO DE REGISTRO ---
 
     $nombre_completo = trim($alumnoInst['alunom'] . ' ' . $alumnoInst['aluapp'] . ' ' . $alumnoInst['aluapm']);
+    $carrera = $alumnoInst['carrera'] ?? null;
 
     /**
      * ✅ CAMBIO A ARGON2ID
@@ -64,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $passwordHash = password_hash($pass, PASSWORD_ARGON2ID);
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO alumnos (num_control, nombre_completo, password) VALUES (?, ?, ?)");
-        $stmt->execute([$num_control, $nombre_completo, $passwordHash]);
+        $stmt = $pdo->prepare("INSERT INTO alumnos (num_control, nombre_completo, password, carrera, correo) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$num_control, $nombre_completo, $passwordHash, $carrera, $correo]);
 
         header("Location: ../vistas/login.php?msg=" . urlencode("¡Registro exitoso! Ya puedes entrar."));
         exit;

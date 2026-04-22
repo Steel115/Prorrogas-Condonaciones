@@ -8,25 +8,12 @@ include '../includes/header.php';
 $num_control = $_GET['num_control'];
 
 // Consulta a la tabla alumnos del sistema de prorrogas
-$stmtAlu = $pdo->prepare("SELECT nombre_completo, num_control, es_deudor FROM alumnos WHERE num_control = ?");
+$stmtAlu = $pdo->prepare("SELECT nombre_completo, num_control, es_deudor, carrera, correo FROM alumnos WHERE num_control = ?");
 $stmtAlu->execute([$num_control]);
 $alumno = $stmtAlu->fetch();
 
 if (!$alumno) {
     die("Error: El alumno no se encuentra en los registros del sistema.");
-}
-
-// Obtener carrera y correo desde la BD institucional
-$alumno['carrera'] = 'N/A';
-$alumno['correo']  = 'N/A';
-if ($pdo_inst) {
-    $stmtInst = $pdo_inst->prepare("SELECT carrera, alumai FROM alumnos_inst WHERE aluctr = ?");
-    $stmtInst->execute([$num_control]);
-    $instData = $stmtInst->fetch();
-    if ($instData) {
-        $alumno['carrera'] = $instData['carrera'] ?? 'N/A';
-        $alumno['correo']  = $instData['alumai']  ?? 'N/A';
-    }
 }
 
 $sql = "SELECT s.*, a.titulo, a.ciclo_escolar, u.nombre_completo as revisor 
