@@ -36,11 +36,11 @@ $rol = $_SESSION['rol'] ?? null;
         <?php if ($rol === 'admin'): ?>
             <li><a href="admin_dashboard.php" class="<?php echo $paginaActual === 'admin_dashboard.php' ? 'activo' : ''; ?>">📋 Asignaciones</a></li>
             <li><a href="admin_usuarios.php" class="<?php echo $paginaActual === 'admin_usuarios.php' ? 'activo' : ''; ?>">👥 Usuarios</a></li>
+            <li><a href="reporte.php" class="<?php echo $paginaActual === 'reporte.php' ? 'activo' : ''; ?>">📊 Reportes</a></li>
         <?php endif; ?>
         <li><a href="admin_solicitudes.php" class="<?php echo $paginaActual === 'admin_solicitudes.php' ? 'activo' : ''; ?>">📬 Solicitudes</a></li>
         <li><a href="admin_historial.php" class="<?php echo $paginaActual === 'admin_historial.php' ? 'activo' : ''; ?>">📁 Historial</a></li>
         <li><a href="admin_deudores.php" class="<?php echo $paginaActual === 'admin_deudores.php' ? 'activo' : ''; ?>">⚠️ Deudores</a></li>
-        <li><a href="reporte.php" class="<?php echo $paginaActual === 'reporte.php' ? 'activo' : ''; ?>">📊 Reportes</a></li>
     </ul>
 </nav>
 <?php endif; ?>
