@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registro</title>
+<title>Registro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/layout.css">
     <style>
         .form-section { display: none; }
@@ -61,11 +62,28 @@
                                 <div id="matchMessage" class="form-text fw-bold"></div>
                             </div>
 
+                            <div class="mb-3 p-3 border rounded shadow-sm bg-light">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="checkbox" class="btn-check" name="terminos" id="terminos" autocomplete="off" required>
+                                    
+                                    <label class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center" 
+                                           for="terminos" 
+                                           style="width: 32px; height: 32px; cursor: pointer; border-radius: 6px;">
+                                        <i class="bi bi-square fs-4" id="checkIconInst"></i>
+                                    </label>
+                                    
+                                    <label for="terminos" class="fw-bold m-0" style="cursor: pointer;">
+                                        Acepto los <a href="../assets/pdf/terminos.pdf" target="_blank" class="text-decoration-none">términos de uso</a>
+                                    </label>
+                                </div>
+                            </div>
+
                             <div class="d-grid">
                                 <button type="submit" id="btnRegistrar" class="btn btn-primary w-100" disabled>
                                     Registrarme
                                 </button>
                             </div>
+                            
                         </form>
 
                         <form action="../auth/registro_nuevo.php" method="POST" id="formNuevoIngreso" class="form-section">
@@ -137,11 +155,28 @@
                                 <div id="matchMessageNuevo" class="form-text fw-bold"></div>
                             </div>
 
+                            <div class="mb-3 p-3 border rounded shadow-sm bg-light">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="checkbox" class="btn-check" name="terminos" id="terminosNuevo" autocomplete="off" required>
+                                    
+                                    <label class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center" 
+                                           for="terminosNuevo" 
+                                           style="width: 32px; height: 32px; cursor: pointer; border-radius: 6px;">
+                                        <i class="bi bi-square fs-4" id="checkIconNuevo"></i>
+                                    </label>
+                                    
+                                    <label for="terminosNuevo" class="fw-bold m-0" style="cursor: pointer;">
+                                        Acepto los <a href="../assets/pdf/terminos.pdf" target="_blank" class="text-decoration-none">términos de uso</a>
+                                    </label>
+                                </div>
+                            </div>
+
                             <div class="d-grid">
                                 <button type="submit" id="btnRegistrarNuevo" class="btn btn-success w-100" disabled>
                                     Registrarme
                                 </button>
                             </div>
+                            
                         </form>
 
                         <div class="mt-3 text-center">
@@ -286,6 +321,42 @@
 
         password.addEventListener('input', validar);
         confirm.addEventListener('input', validar);
+    })();
+
+    // Checkbox institucional
+    (function() {
+        const checkbox = document.getElementById('terminos');
+        const icon = document.getElementById('checkIconInst');
+        
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                icon.classList.remove('bi-square');
+                icon.classList.add('bi-check-square-fill');
+                icon.style.color = '#ffffff';
+            } else {
+                icon.classList.remove('bi-check-square-fill');
+                icon.classList.add('bi-square');
+                icon.style.color = '';
+            }
+        });
+    })();
+
+    // Checkbox nuevo ingreso
+    (function() {
+        const checkbox = document.getElementById('terminosNuevo');
+        const icon = document.getElementById('checkIconNuevo');
+        
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                icon.classList.remove('bi-square');
+                icon.classList.add('bi-check-square-fill');
+                icon.style.color = '#ffffff';
+            } else {
+                icon.classList.remove('bi-check-square-fill');
+                icon.classList.add('bi-square');
+                icon.style.color = '';
+            }
+        });
     })();
     </script>
 </body>

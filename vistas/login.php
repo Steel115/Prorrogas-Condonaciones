@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Iniciar sesión</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 
@@ -41,19 +42,18 @@
                             </div>
                             
                             <div class="mb-3 p-3 border rounded shadow-sm bg-light">
-                                <div class="d-flex align-items-center">
+                                <div class="d-flex align-items-center gap-3">
                                     <input type="checkbox" class="btn-check" name="terminos" id="terminos" autocomplete="off" required>
-                                
-                                    <label class="btn btn-sm btn-outline-success fw-bold w-auto me-2" for="terminos">
-                                        <i class="bi bi-check-lg">Acepto</i> 
+                                    
+                                    <label class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center" 
+                                           for="terminos" 
+                                           style="width: 32px; height: 32px; cursor: pointer; border-radius: 6px;">
+                                        <i class="bi bi-square fs-4" id="checkIcon"></i>
                                     </label>
-
-                                    <span class="small text-muted">
-                                        los términos de uso
-                                        <a href="../assets/pdf/terminos.pdf" target="_blank" class="text-decoration-none fw-bold">
-                                            términos de uso
-                                        </a>
-                                    </span>
+                                    
+                                    <label for="terminos" class="fw-bold m-0" style="cursor: pointer;">
+                                        Acepto los <a href="../assets/pdf/terminos.pdf" target="_blank" class="text-decoration-none">términos de uso</a>
+                                    </label>
                                 </div>
                             </div>
                             
@@ -73,5 +73,27 @@
     </main>
     <?php include '../includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    const checkbox = document.getElementById('terminos');
+    const icon = document.getElementById('checkIcon');
+    
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            icon.classList.remove('bi-square');
+            icon.classList.add('bi-check-square-fill');
+            icon.style.color = '#ffffff';
+        } else {
+            icon.classList.remove('bi-check-square-fill');
+            icon.classList.add('bi-square');
+            icon.style.color = '';
+        }
+    });
+    
+    if (checkbox.checked) {
+        icon.classList.remove('bi-square');
+        icon.classList.add('bi-check-square-fill');
+        icon.style.color = '#0026ff';
+    }
+    </script>
 </body>
 </html>

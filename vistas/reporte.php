@@ -5,6 +5,7 @@ require_once '../includes/auth_check.php';
 permitirAcceso(['admin']);
 include '../includes/header.php';
 
+// Filtramos solo las asignaciones que no estén archivadas (estatus 0 o 2 según tu código)
 $asignacionesActivas = $pdo->prepare("SELECT * FROM asignaciones WHERE estatus IN (0, 2) ORDER BY fecha_creacion DESC");
 $asignacionesActivas->execute();
 $asignaciones = $asignacionesActivas->fetchAll();
@@ -12,6 +13,7 @@ $asignaciones = $asignacionesActivas->fetchAll();
 $solicitudesGeneral = [];
 
 foreach ($asignaciones as &$asig) {
+    // Ajustamos el ORDER BY con FIELD() para la prioridad de estatus
     $stmtSol = $pdo->prepare("
         SELECT s.id_solicitud, s.id_asignacion, al.num_control, al.nombre_completo, al.es_deudor, al.carrera,
                s.estatus, a.titulo as nombre_asignacion
@@ -20,11 +22,7 @@ foreach ($asignaciones as &$asig) {
         JOIN asignaciones a ON s.id_asignacion = a.id_asignacion
         WHERE s.id_asignacion = ? AND s.estatus IN ('Finalizada', 'Rechazada', 'Deudor')
         ORDER BY 
-            CASE s.estatus 
-                WHEN 'Deudor' THEN 1 
-                WHEN 'Rechazada' THEN 2 
-                WHEN 'Finalizada' THEN 3 
-            END,
+            FIELD(s.estatus, 'Deudor', 'Rechazada', 'Finalizada'),
             al.nombre_completo ASC
     ");
     $stmtSol->execute([$asig['id_asignacion']]);
