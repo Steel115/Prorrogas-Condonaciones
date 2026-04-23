@@ -179,12 +179,7 @@ unset($asig);
                             <tr>
                                 <td><?php echo htmlspecialchars($sol['nombre_asignacion']); ?></td>
                                 <td class="fw-semibold"><?php echo $sol['num_control']; ?></td>
-                                <td>
-                                    <?php echo htmlspecialchars($sol['nombre_completo']); ?>
-                                    <?php if($sol['es_deudor'] == 1): ?>
-                                        <span class="estatus-pill estatus-deudor ms-1" style="font-size:0.72rem;">DEUDOR</span>
-                                    <?php endif; ?>
-                                </td>
+                                <td><?php echo htmlspecialchars($sol['nombre_completo']); ?></td>
                                 <td><?php echo htmlspecialchars($sol['carrera']); ?></td>
                                 <td>
                                     <?php if($sol['estatus'] === 'Finalizada'): ?>
@@ -192,7 +187,7 @@ unset($asig);
                                     <?php elseif($sol['estatus'] === 'Rechazada'): ?>
                                         <span class="estatus-pill estatus-rechazada">Rechazada</span>
                                     <?php elseif($sol['estatus'] === 'Deudor'): ?>
-                                        <span class="estatus-pill estatus-deudor">Deudor</span>
+                                        <span class="badge bg-danger">⚠️ Deudor</span>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -254,12 +249,7 @@ unset($asig);
                                 <?php foreach ($asig['solicitudes'] as $sol): ?>
                                 <tr>
                                     <td class="fw-semibold"><?php echo $sol['num_control']; ?></td>
-                                    <td>
-                                        <?php echo htmlspecialchars($sol['nombre_completo']); ?>
-                                        <?php if($sol['es_deudor'] == 1): ?>
-                                            <span class="estatus-pill estatus-deudor ms-1" style="font-size:0.72rem;">DEUDOR</span>
-                                        <?php endif; ?>
-                                    </td>
+                                    <td><?php echo htmlspecialchars($sol['nombre_completo']); ?></td>
                                     <td><?php echo htmlspecialchars($sol['carrera']); ?></td>
                                     <td>
                                         <?php if($sol['estatus'] === 'Finalizada'): ?>
@@ -267,7 +257,7 @@ unset($asig);
                                         <?php elseif($sol['estatus'] === 'Rechazada'): ?>
                                             <span class="estatus-pill estatus-rechazada">Rechazada</span>
                                         <?php elseif($sol['estatus'] === 'Deudor'): ?>
-                                            <span class="estatus-pill estatus-deudor">Deudor</span>
+                                            <span class="badge bg-danger">⚠️ Deudor</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -295,9 +285,6 @@ unset($asig);
 </main>
 
 <script>
-// ══════════════════════════════════════════
-// Genera un PDF limpio para impresión/guardado
-// ══════════════════════════════════════════
 function verPDF(contenidoId, titulo) {
     const contenido = document.getElementById(contenidoId);
     if (!contenido) return;

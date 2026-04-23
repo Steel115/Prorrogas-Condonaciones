@@ -4,7 +4,7 @@ require_once '../includes/auth_check.php';
 permitirAcceso(['admin']);
 include '../includes/header.php';
 
-$stmt = $pdo->query("SELECT * FROM usuarios ORDER BY nombre_completo ASC");
+$stmt = $pdo->query("SELECT * FROM usuarios ORDER BY estatus DESC, nombre_completo ASC");
 $usuarios = $stmt->fetchAll();
 ?>
 
@@ -39,7 +39,7 @@ $usuarios = $stmt->fetchAll();
                 </thead>
                 <tbody>
                     <?php foreach ($usuarios as $u): ?>
-                    <tr>
+                    <tr class="<?php echo ($u['estatus'] == 0) ? 'opacity-50' : ''; ?>">
                         <td><?php echo $u['num_trabajador']; ?></td>
                         <td><?php echo htmlspecialchars($u['nombre_completo']); ?></td>
                         <td><?php echo htmlspecialchars($u['area_trabajo']); ?></td>
@@ -61,10 +61,13 @@ $usuarios = $stmt->fetchAll();
                                     onclick="llenarModalUsuario(this)">
                                 ✏️ Editar
                             </button>
-                            <a href="../auth/cambiar_estatus_usuario.php?id=<?php echo $u['num_trabajador']; ?>" 
-                               class="btn btn-sm <?php echo ($u['estatus'] == 1) ? 'btn-outline-danger' : 'btn-outline-success'; ?>">
-                                <?php echo ($u['estatus'] == 1) ? 'Desactivar' : 'Activar'; ?>
-                            </a>
+                            <button type="button"
+                                class="btn btn-sm <?php echo ($u['estatus'] == 1) ? 'btn-outline-danger' : 'btn-outline-success'; ?> btn-cambiar-estatus"
+                                data-url="../auth/cambiar_estatus_usuario.php?id=<?php echo $u['num_trabajador']; ?>"
+                                data-nombre="<?php echo htmlspecialchars($u['nombre_completo'], ENT_QUOTES); ?>"
+                                data-accion="<?php echo ($u['estatus'] == 1) ? 'deshabilitar' : 'habilitar'; ?>">
+                                <?php echo ($u['estatus'] == 1) ? 'Deshabilitar' : 'Habilitar'; ?>
+                            </button>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -75,17 +78,33 @@ $usuarios = $stmt->fetchAll();
 
     <?php include 'modales/nuevo_usuario.php'; ?>
     <?php include 'modales/editar_usuario.php'; ?>
+    <?php include 'modales/modal_confirmacion.php'; ?>
     <?php include '../includes/footer.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function llenarModalUsuario(boton) {
-    document.getElementById('edit_user_id').value    = boton.getAttribute('data-id');
+    document.getElementById('edit_user_id').value     = boton.getAttribute('data-id');
     document.getElementById('edit_user_nombre').value = boton.getAttribute('data-nombre');
-    document.getElementById('edit_user_num').value   = boton.getAttribute('data-num');
-    document.getElementById('edit_user_rol').value   = boton.getAttribute('data-rol');
-    document.getElementById('edit_user_area').value  = boton.getAttribute('data-area');
+    document.getElementById('edit_user_num').value    = boton.getAttribute('data-num');
+    document.getElementById('edit_user_rol').value    = boton.getAttribute('data-rol');
+    document.getElementById('edit_user_area').value   = boton.getAttribute('data-area');
 }
+
+document.querySelectorAll('.btn-cambiar-estatus').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const url     = this.getAttribute('data-url');
+        const nombre  = this.getAttribute('data-nombre');
+        const accion  = this.getAttribute('data-accion');
+        const esDeshabilitar = accion === 'deshabilitar';
+
+        confirmarAccion(
+            '¿Confirmas que deseas ' + accion + ' al usuario ' + nombre + '?',
+            function() { window.location.href = url; },
+            esDeshabilitar ? 'danger' : 'success'
+        );
+    });
+});
 </script>
 </body>
 </html>
